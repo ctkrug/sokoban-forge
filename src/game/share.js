@@ -20,3 +20,15 @@ export function decodeShareParams(search) {
   }
   return { difficulty, seed };
 }
+
+/**
+ * A numeric-looking seed round-trips through the URL as a string; convert it
+ * back to a number so it reproduces the exact same level (createRng treats
+ * numeric and string seeds differently). Non-numeric seeds (or "NaN"/"" edge
+ * cases) are passed through unchanged and still hash deterministically via
+ * xmur3.
+ */
+export function parseSeed(rawSeed) {
+  const asNumber = Number(rawSeed);
+  return Number.isNaN(asNumber) ? rawSeed : asNumber;
+}
