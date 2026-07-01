@@ -452,6 +452,22 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('status').textContent).toBe('Solution found: 1 move.');
   });
 
+  it('reports "Already solved!" when solving a board that is already won', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+    const solveStep = document.getElementById('solve-step');
+    while (!solveStep.disabled) {
+      solveStep.click();
+    }
+    expect(document.getElementById('status').textContent).toBe('Solved! 🎉');
+
+    document.getElementById('solve').click();
+
+    expect(document.getElementById('status').textContent).toBe('Already solved!');
+  });
+
   it('reports when no solution exists from the current position', async () => {
     // Deadlocks the lone box against the left wall (x=1) - it can never be
     // pushed sideways again since that requires standing in the wall at
