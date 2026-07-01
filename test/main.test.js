@@ -15,9 +15,17 @@ function setUpDom() {
     <button id="undo" type="button">Undo</button>
     <button id="redo" type="button">Redo</button>
     <button id="share" type="button">Copy link</button>
+    <button id="mute" type="button" aria-pressed="false">Sound on</button>
     <span id="move-counter">Moves: 0</span>
     <span id="target-counter">Boxes on target: 0/0</span>
-    <canvas id="game-canvas" width="280" height="280"></canvas>
+    <div id="board-frame">
+      <canvas id="game-canvas" width="280" height="280"></canvas>
+      <div id="win-overlay" hidden>
+        <p id="win-moves"></p>
+        <button id="win-next" type="button">Next puzzle</button>
+        <button id="win-replay" type="button">Replay</button>
+      </div>
+    </div>
     <button id="solve" type="button">Solve</button>
     <button id="solve-step" type="button" disabled>Step</button>
     <button id="solve-play" type="button" disabled>Play</button>
@@ -25,11 +33,22 @@ function setUpDom() {
     <p id="status"></p>
   `;
 
-  // jsdom has no canvas backend; main.js only ever calls fillRect/sets
-  // fillStyle on the context, so a minimal stub is enough to load it.
+  // jsdom has no canvas backend; the renderer only ever uses the 2D calls
+  // below, so an inert stub is enough to load main.js.
   HTMLCanvasElement.prototype.getContext = () => ({
     fillStyle: '',
+    strokeStyle: '',
+    lineWidth: 0,
+    globalAlpha: 1,
     fillRect() {},
+    save() {},
+    restore() {},
+    translate() {},
+    rotate() {},
+    beginPath() {},
+    arc() {},
+    fill() {},
+    stroke() {},
   });
 }
 
@@ -928,5 +947,362 @@ describe('main.js DOM wiring', () => {
     // was what got copied, not a stale or empty string.
     expect(writeText).toHaveBeenCalledWith(window.location.href);
     expect(document.getElementById('status').textContent).toBe('Link copied!');
+  });
+});
+
+describe('design layer: sound, swipe, win moment, responsive board', () => {
+  let savedRaf;
+  let savedMatchMedia;
+
+  beforeEach(() => {
+    window.history.replaceState(null, '', '/');
+    setUpDom();
+    // jsdom has a real requestAnimationFrame; every test in this block
+    // replaces it with a manual queue (or leaves it) and these restore it,
+    // so no jsdom-scheduled animation loop can leak across tests.
+    savedRaf = window.requestAnimationFrame;
+    savedMatchMedia = window.matchMedia;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    window.requestAnimationFrame = savedRaf;
+    window.matchMedia = savedMatchMedia;
+    window.localStorage.clear();
+  });
+
+  /**
+   * Installs a manual requestAnimationFrame queue so tests can play the
+   * animation loop forward deterministically with chosen timestamps.
+   */
+  function installRafQueue() {
+    const queue = [];
+    window.requestAnimationFrame = (cb) => {
+      queue.push(cb);
+      return queue.length;
+    };
+    return {
+      /** Runs everything currently queued at time `now`; returns run count. */
+      flush(now) {
+        const batch = queue.splice(0);
+        for (const cb of batch) {
+          cb(now);
+        }
+        return batch.length;
+      },
+      get pending() {
+        return queue.length;
+      },
+    };
+  }
+
+  /** Steps the solver to completion, winning the level. */
+  function winViaSolver() {
+    document.getElementById('solve').click();
+    const step = document.getElementById('solve-step');
+    let guard = 200;
+    while (!step.disabled && guard > 0) {
+      step.click();
+      guard -= 1;
+    }
+    expect(document.getElementById('status').textContent).toBe('Solved! 🎉');
+  }
+
+  it('toggles the mute button state, label, and persistence', async () => {
+    await importMain();
+    const mute = document.getElementById('mute');
+
+    expect(mute.getAttribute('aria-pressed')).toBe('false');
+    expect(mute.textContent).toBe('Sound on');
+
+    mute.click();
+    expect(mute.getAttribute('aria-pressed')).toBe('true');
+    expect(mute.textContent).toBe('Sound off');
+    expect(mute.getAttribute('aria-label')).toBe('Unmute sound');
+    expect(window.localStorage.getItem('shove.muted')).toBe('1');
+
+    mute.click();
+    expect(mute.getAttribute('aria-pressed')).toBe('false');
+    expect(window.localStorage.getItem('shove.muted')).toBe('0');
+  });
+
+  it('shows the win overlay with the move count and starts a fresh level from Next puzzle', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    installRafQueue(); // park animations in a queue this test never flushes
+    await importMain();
+
+    const overlay = document.getElementById('win-overlay');
+    expect(overlay.hidden).toBe(true);
+
+    winViaSolver();
+
+    expect(overlay.hidden).toBe(false);
+    expect(document.getElementById('win-moves').textContent).toMatch(/All crates home in \d+ moves?\./);
+
+    document.getElementById('win-next').click();
+    expect(overlay.hidden).toBe(true);
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+    expect(document.getElementById('status').textContent).toBe('');
+  });
+
+  it('replays the same level from the win overlay Replay button', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    installRafQueue();
+    await importMain();
+    const urlBefore = window.location.search;
+
+    winViaSolver();
+    document.getElementById('win-replay').click();
+
+    expect(document.getElementById('win-overlay').hidden).toBe(true);
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+    expect(window.location.search).toBe(urlBefore); // same seed, same level
+  });
+
+  it('hides the win overlay again when the player undoes out of the win', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    installRafQueue();
+    await importMain();
+
+    winViaSolver();
+    expect(document.getElementById('win-overlay').hidden).toBe(false);
+
+    document.getElementById('undo').click();
+    expect(document.getElementById('win-overlay').hidden).toBe(true);
+  });
+
+  it('moves the player on a horizontal swipe across the board', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+    const canvas = document.getElementById('game-canvas');
+
+    // Find a horizontal direction that actually moves by trying both swipes.
+    for (const [fromX, toX] of [
+      [10, 60], // right
+      [60, 10], // left
+    ]) {
+      canvas.dispatchEvent(new window.MouseEvent('pointerdown', { clientX: fromX, clientY: 40 }));
+      canvas.dispatchEvent(new window.MouseEvent('pointerup', { clientX: toX, clientY: 40 }));
+      if (document.getElementById('move-counter').textContent === 'Moves: 1') {
+        return;
+      }
+    }
+    // Both horizontal directions blocked is possible in principle; vertical must work then.
+    canvas.dispatchEvent(new window.MouseEvent('pointerdown', { clientX: 40, clientY: 10 }));
+    canvas.dispatchEvent(new window.MouseEvent('pointerup', { clientX: 40, clientY: 60 }));
+    canvas.dispatchEvent(new window.MouseEvent('pointerdown', { clientX: 40, clientY: 60 }));
+    canvas.dispatchEvent(new window.MouseEvent('pointerup', { clientX: 40, clientY: 10 }));
+    expect(document.getElementById('move-counter').textContent).not.toBe('Moves: 0');
+  });
+
+  it('moves the player on a vertical swipe (dominant-axis pick)', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+    const canvas = document.getElementById('game-canvas');
+
+    for (const [fromY, toY] of [
+      [10, 70], // down (dy 60 dominates dx 5)
+      [70, 10], // up
+    ]) {
+      canvas.dispatchEvent(new window.MouseEvent('pointerdown', { clientX: 40, clientY: fromY }));
+      canvas.dispatchEvent(new window.MouseEvent('pointerup', { clientX: 45, clientY: toY }));
+      if (document.getElementById('move-counter').textContent === 'Moves: 1') {
+        return;
+      }
+    }
+    canvas.dispatchEvent(new window.MouseEvent('pointerdown', { clientX: 10, clientY: 40 }));
+    canvas.dispatchEvent(new window.MouseEvent('pointerup', { clientX: 70, clientY: 44 }));
+    canvas.dispatchEvent(new window.MouseEvent('pointerdown', { clientX: 70, clientY: 40 }));
+    canvas.dispatchEvent(new window.MouseEvent('pointerup', { clientX: 10, clientY: 44 }));
+    expect(document.getElementById('move-counter').textContent).not.toBe('Moves: 0');
+  });
+
+  it('treats a short pointer press as a tap, not a swipe', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+    const canvas = document.getElementById('game-canvas');
+
+    canvas.dispatchEvent(new window.MouseEvent('pointerdown', { clientX: 40, clientY: 40 }));
+    canvas.dispatchEvent(new window.MouseEvent('pointerup', { clientX: 45, clientY: 42 }));
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+  });
+
+  it('ignores a pointerup that never had a matching pointerdown', async () => {
+    await importMain();
+    const canvas = document.getElementById('game-canvas');
+
+    expect(() =>
+      canvas.dispatchEvent(new window.MouseEvent('pointerup', { clientX: 40, clientY: 40 })),
+    ).not.toThrow();
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+  });
+
+  it('suppresses the click that follows a swipe so one gesture is one move', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+    const canvas = document.getElementById('game-canvas');
+
+    canvas.dispatchEvent(new window.MouseEvent('pointerdown', { clientX: 10, clientY: 40 }));
+    canvas.dispatchEvent(new window.MouseEvent('pointerup', { clientX: 60, clientY: 40 }));
+    const movesAfterSwipe = document.getElementById('move-counter').textContent;
+
+    // The browser fires a click for the same press/release; it must be eaten
+    // even if it lands on a tile that would otherwise be a legal tap.
+    canvas.dispatchEvent(new window.MouseEvent('click', { clientX: 60, clientY: 40 }));
+    expect(document.getElementById('move-counter').textContent).toBe(movesAfterSwipe);
+  });
+
+  it('resizes the canvas to the board frame at devicePixelRatio', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+    const canvas = document.getElementById('game-canvas');
+    const frame = document.getElementById('board-frame');
+
+    Object.defineProperty(frame, 'clientWidth', { value: 824, configurable: true });
+    Object.defineProperty(window, 'devicePixelRatio', { value: 2, configurable: true });
+    window.dispatchEvent(new window.Event('resize'));
+
+    const cols = Number(canvas.style.width.replace('px', ''));
+    expect(cols).toBeGreaterThan(0);
+    // Backing store is exactly DPR x CSS size - the crisp-canvas contract.
+    expect(canvas.width).toBe(cols * 2);
+  });
+
+  it('falls back to default tile sizing when layout has no measurements', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    const innerHeight = window.innerHeight;
+    Object.defineProperty(window, 'innerHeight', { value: 0, configurable: true });
+    try {
+      await importMain();
+      const canvas = document.getElementById('game-canvas');
+      expect(canvas.width).toBeGreaterThan(0);
+    } finally {
+      Object.defineProperty(window, 'innerHeight', { value: innerHeight, configurable: true });
+    }
+  });
+
+  it('plays the slide/bump animations through a rAF loop until they settle', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    const raf = installRafQueue();
+    await importMain();
+
+    makeAnyLegalMove();
+    expect(raf.pending).toBeGreaterThan(0); // the move scheduled a tween frame
+
+    let now = 1000;
+    let guard = 100;
+    while (raf.flush(now) > 0 && guard > 0) {
+      now += 50;
+      guard -= 1;
+    }
+    expect(raf.pending).toBe(0); // loop stopped once the slide finished
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+  });
+
+  it('plays a bump (blocked move) animation when shoving into a wall', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    const raf = installRafQueue();
+    await importMain();
+
+    // Marching left must eventually hit the level's boundary wall.
+    const moveCounter = document.getElementById('move-counter');
+    let before = moveCounter.textContent;
+    let guard = 30;
+    while (guard > 0) {
+      window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+      if (moveCounter.textContent === before) {
+        break; // blocked: this press bumped instead of moving
+      }
+      before = moveCounter.textContent;
+      guard -= 1;
+    }
+    expect(guard).toBeGreaterThan(0);
+
+    let now = 5000;
+    guard = 100;
+    while (raf.flush(now) > 0 && guard > 0) {
+      now += 40;
+      guard -= 1;
+    }
+    expect(raf.pending).toBe(0);
+  });
+
+  it('rains confetti on the win and stops the loop when it expires', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    const raf = installRafQueue();
+    await importMain();
+
+    winViaSolver();
+    expect(raf.pending).toBeGreaterThan(0); // celebration is animating
+
+    let now = 10_000;
+    let guard = 200;
+    while (raf.flush(now) > 0 && guard > 0) {
+      now += 400; // big steps so the 1.8s confetti life expires quickly
+      guard -= 1;
+    }
+    expect(raf.pending).toBe(0); // celebration wound down on its own
+    expect(document.getElementById('win-overlay').hidden).toBe(false);
+  });
+
+  it('celebrates a reduced-motion win with the overlay but without confetti frames', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=1');
+    const raf = installRafQueue();
+    window.matchMedia = () => ({ matches: true });
+    await importMain();
+
+    document.getElementById('solve').click();
+    document.getElementById('solve-step').click();
+
+    expect(document.getElementById('win-overlay').hidden).toBe(false);
+    expect(raf.pending).toBe(0); // no confetti loop was scheduled
+  });
+
+  it('skips animation entirely when the user prefers reduced motion', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    const raf = installRafQueue();
+    window.matchMedia = () => ({ matches: true });
+    await importMain();
+
+    makeAnyLegalMove();
+
+    expect(raf.pending).toBe(0); // moved instantly, no tween scheduled
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+  });
+});
+
+describe('design layer: coverage edges', () => {
+  beforeEach(() => {
+    window.history.replaceState(null, '', '/');
+    setUpDom();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    window.localStorage.clear();
+  });
+
+  it('uses singular copy for a one-move win (easy seed 1 is a real 1-move puzzle)', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=1');
+    await importMain();
+
+    document.getElementById('solve').click();
+    document.getElementById('solve-step').click();
+
+    expect(document.getElementById('status').textContent).toBe('Solved! 🎉');
+    expect(document.getElementById('win-moves').textContent).toBe('All crates home in 1 move.');
+  });
+
+  it('treats a missing/zero devicePixelRatio as 1', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+    const canvas = document.getElementById('game-canvas');
+
+    Object.defineProperty(window, 'devicePixelRatio', { value: 0, configurable: true });
+    window.dispatchEvent(new window.Event('resize'));
+
+    const cssWidth = Number(canvas.style.width.replace('px', ''));
+    expect(canvas.width).toBe(cssWidth); // dpr fell back to 1
   });
 });
