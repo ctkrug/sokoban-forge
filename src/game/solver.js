@@ -181,7 +181,10 @@ export function aStarSolve(grid, player, boxes, { maxStates = 200000 } = {}) {
     const current = frontier.pop();
     explored += 1;
     const currentKey = serialize(current.player, current.boxes);
-    if (current.path.length > (gScore.get(currentKey) ?? Infinity)) {
+    // gScore is always set for a node's key before it's pushed to the
+    // frontier (the start node above, or via gScore.set(key, g) below), so
+    // this lookup can never miss - no `?? Infinity` fallback needed.
+    if (current.path.length > gScore.get(currentKey)) {
       continue; // a cheaper path to this state was already processed
     }
 
