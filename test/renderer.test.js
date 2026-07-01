@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { TILE, createEmptyGrid } from '../src/game/grid.js';
-import { drawState } from '../src/game/renderer.js';
+import { drawGrid, drawState } from '../src/game/renderer.js';
 
 function createStubContext() {
   return {
@@ -14,6 +14,18 @@ function createStubContext() {
     fillRect() {},
   };
 }
+
+describe('drawGrid', () => {
+  it('falls back to the floor color for an unrecognized tile value', () => {
+    const grid = createEmptyGrid(2, 1);
+    grid[0][1] = 'lava'; // not a value TILE_COLORS knows about
+    const ctx = createStubContext();
+
+    drawGrid(ctx, grid);
+
+    expect(ctx.fillStyleLog[1]).toBe(ctx.fillStyleLog[0]); // same as a plain floor tile
+  });
+});
 
 describe('drawState', () => {
   it('draws the grid tiles followed by boxes and the player', () => {
