@@ -255,6 +255,22 @@ describe('main.js DOM wiring', () => {
     },
   );
 
+  it('still moves the player on an arrow key while a <button> has focus', async () => {
+    // BUTTON is deliberately not in FORM_CONTROL_TAGS: buttons don't use
+    // arrow keys natively, and clicking any button (New level, Reset, ...)
+    // is exactly what leaves one focused right before the player's next
+    // keypress in normal play - if this regressed to blocking movement too,
+    // it'd be very easy to hit and easy to miss in manual testing.
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    const newLevelButton = document.getElementById('new-level');
+    newLevelButton.focus();
+    newLevelButton.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+  });
+
   it('ignores keys that are not a movement key', async () => {
     await importMain();
 
