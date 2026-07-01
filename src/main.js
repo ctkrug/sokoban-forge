@@ -114,6 +114,12 @@ function stepSolution() {
 }
 
 solveButton.addEventListener('click', () => {
+  // Without this, re-solving while a previous solution is auto-playing swaps
+  // the plan being stepped through mid-flight without the Play button ever
+  // reflecting that a *new* solve happened - stop and let the player
+  // explicitly press Play again on the fresh solution instead.
+  stopPlayback();
+
   const { grid, player, boxes } = history.state;
   const cellCount = grid.length * grid[0].length;
   const solve = cellCount <= BFS_CELL_THRESHOLD ? bfsSolve : aStarSolve;
