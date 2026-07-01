@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1b1e24" />
+    <meta
+      name="description"
+      content="A browser Sokoban puzzle game with procedurally generated, guaranteed-solvable levels and an animated BFS/A* solver."
+    />
+    <title>Shove · Endless box puzzles you can always solve</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%232e5c46'/%3E%3Crect x='3' y='3' width='10' height='10' fill='%238a6fd6'/%3E%3C/svg%3E"
+    />
+    <script type="module" crossorigin src="./assets/index-D_-I8LDU.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-B26JrM6v.css">
+  </head>
+  <body>
+    <main>
+      <header id="brand">
+        <h1 id="wordmark">
+          <svg class="mark" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="9" y="6" width="12" height="12" rx="2" fill="currentColor" />
+            <path
+              d="M1 12h5M4 9l3 3-3 3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span>Shove</span>
+        </h1>
+        <p id="tagline">Endless box puzzles you can always solve.</p>
+      </header>
+      <div id="controls">
+        <label for="difficulty">Difficulty</label>
+        <select id="difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+        <button id="new-level" type="button">New level</button>
+        <button id="reset" type="button" title="Shortcut: R">Reset</button>
+        <button id="undo" type="button" title="Shortcut: Z">Undo</button>
+        <button id="redo" type="button" title="Shortcut: Y">Redo</button>
+        <button id="share" type="button">Copy link</button>
+        <span id="move-counter" aria-live="polite">Moves: 0</span>
+        <span id="target-counter" aria-live="polite">Boxes on target: 0/0</span>
+      </div>
+      <canvas
+        id="game-canvas"
+        width="400"
+        height="320"
+        role="img"
+        aria-label="Sokoban board: use arrow keys, WASD, or tap an adjacent tile to move"
+      ></canvas>
+      <div id="solver-controls">
+        <button id="solve" type="button">Solve</button>
+        <button id="solve-step" type="button" disabled>Step</button>
+        <button id="solve-play" type="button" disabled aria-pressed="false">Play</button>
+        <label for="solve-speed">Speed</label>
+        <input id="solve-speed" type="range" min="60" max="600" step="20" value="250" />
+      </div>
+      <p id="status" role="status"></p>
+      <footer id="repo-link">
+        <a href="https://github.com/ctkrug/sokoban-forge">View the source on GitHub</a>
+      </footer>
+    </main>
+  </body>
+</html>
