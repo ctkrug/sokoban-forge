@@ -187,6 +187,26 @@ describe('main.js DOM wiring', () => {
     expect(window.location.search).toBe('?difficulty=easy&seed=0');
   });
 
+  it('reproduces the same level from a crafted URL with a fractional seed', async () => {
+    // parseSeed('3.5') -> Number('3.5') = 3.5, a "numeric" seed that isn't
+    // NaN, so it reaches mulberry32 as a float rather than a string seed.
+    // mulberry32 coerces it with `>>> 0`, which truncates to 3 rather than
+    // throwing - still deterministic, just confirm the whole URL -> level
+    // path reproduces identically across two loads of the same link.
+    window.history.replaceState(null, '', '?difficulty=easy&seed=3.5');
+    await importMain();
+    document.getElementById('solve').click();
+    const firstSolveStatus = document.getElementById('status').textContent;
+    expect(firstSolveStatus).toMatch(/^Solution found: \d+ moves?\.$/);
+
+    setUpDom();
+    window.history.replaceState(null, '', '?difficulty=easy&seed=3.5');
+    await importMain();
+    document.getElementById('solve').click();
+
+    expect(document.getElementById('status').textContent).toBe(firstSolveStatus);
+  });
+
   it('falls back to showing the link when the Clipboard API is unavailable', async () => {
     Object.defineProperty(window.navigator, 'clipboard', { value: undefined, configurable: true });
 
