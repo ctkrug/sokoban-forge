@@ -1,0 +1,21 @@
+{
+  "name": "sokoban-forge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Procedurally generated, guaranteed-solvable Sokoban puzzles with an on-demand BFS/A* solver animation.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "eslint": "^9.9.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.0.5"
+  }
+}
