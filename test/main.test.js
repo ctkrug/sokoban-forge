@@ -272,6 +272,43 @@ describe('main.js DOM wiring', () => {
     expect(window.location.search).toBe('?difficulty=easy&seed=11');
   });
 
+  it('resets the level on the "r" key, same as clicking Reset', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    makeAnyLegalMove();
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+
+    window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'r' }));
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+    expect(window.location.search).toBe('?difficulty=easy&seed=11');
+  });
+
+  it('resets on an uppercase "R" too (Caps Lock/Shift held)', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    makeAnyLegalMove();
+    window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'R' }));
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+  });
+
+  it('ignores the "r" key while a form control has focus', async () => {
+    // Otherwise typing "r" to jump the native <select>'s type-ahead to a
+    // difficulty option would also blow away the player's progress.
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    makeAnyLegalMove();
+    const difficultySelect = document.getElementById('difficulty');
+    difficultySelect.focus();
+    difficultySelect.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'r', bubbles: true }));
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+  });
+
   it('generates a fresh level and resets the move counter on New level', async () => {
     window.history.replaceState(null, '', '?difficulty=easy&seed=11');
     await importMain();
