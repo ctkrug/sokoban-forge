@@ -169,6 +169,12 @@ undoButton.addEventListener('click', () => {
 });
 
 shareButton.addEventListener('click', () => {
+  if (!navigator.clipboard) {
+    // Non-secure context (plain http) or an older browser: no Clipboard API
+    // to call, so fall back straight to showing the link.
+    statusLine.textContent = window.location.href;
+    return;
+  }
   navigator.clipboard
     .writeText(window.location.href)
     .then(() => {
