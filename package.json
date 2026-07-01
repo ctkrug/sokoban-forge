@@ -5,6 +5,9 @@
   "description": "Procedurally generated, guaranteed-solvable Sokoban puzzles with an on-demand BFS/A* solver animation.",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
