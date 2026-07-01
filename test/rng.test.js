@@ -28,6 +28,17 @@ describe('mulberry32', () => {
     expect(a()).toBe(b());
   });
 
+  it('is deterministic for a negative seed', () => {
+    // `seed >>> 0` wraps a negative integer into the unsigned 32-bit range
+    // (e.g. -5 becomes 4294967291) rather than throwing - pin down that the
+    // wrap is itself deterministic, since a crafted share URL like
+    // ?seed=-5 reaches this same coercion via parseSeed.
+    const a = mulberry32(-5);
+    const b = mulberry32(-5);
+
+    expect(a()).toBe(b());
+  });
+
   it('always yields floats in [0, 1)', () => {
     const rng = mulberry32(7);
     for (let i = 0; i < 100; i += 1) {
