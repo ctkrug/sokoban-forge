@@ -55,6 +55,17 @@ describe('generateLevel', () => {
     expect(() => generateLevel({ width: 4, height: 4, boxCount: 3, scrambleDepth: 5, seed: 1 })).not.toThrow();
   });
 
+  it('stays fast even on a board where a box can never be pulled', () => {
+    // Regression: a 4x4 board's interior is only 2x2, so no pull can ever
+    // move a box off its target (there's no free cell beyond it in either
+    // direction to pull into) - every one of the dead-end retry loop's
+    // attempts used to burn its full step budget without ever succeeding,
+    // multiplying a single attempt's cost by the full retry count.
+    const start = performance.now();
+    generateLevel({ width: 4, height: 4, boxCount: 1, scrambleDepth: 5, seed: 1 });
+    expect(performance.now() - start).toBeLessThan(250);
+  });
+
   it('never produces a level that is already solved on spawn', () => {
     // Regression: a random pull-walk can easily wander for the whole
     // scramble without ever standing next to the lone box on the "easy"
