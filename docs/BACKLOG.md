@@ -7,9 +7,9 @@ small enough for one focused build session. Check items off as they land.
 
 The grid model, movement rules, and win condition the generator and solver both depend on.
 
-- [ ] Extend the grid model with player/box/target entity state (beyond static tiles)
-- [ ] Implement player movement and box-push rules, including wall/box collision checks
-- [ ] Implement win-condition detection and move history with undo/redo
+- [x] Extend the grid model with player/box/target entity state (beyond static tiles)
+- [x] Implement player movement and box-push rules, including wall/box collision checks
+- [x] Implement win-condition detection and move history with undo/redo
 
 ## Epic 2 — Procedural level generation
 
