@@ -53,4 +53,15 @@ describe('index.html', () => {
 
     expect(themeColor).toBe(bgVar);
   });
+
+  it('starts the solve-play button disabled and unpressed, matching a fresh load', () => {
+    // main.js only ever toggles aria-pressed - it never sets it initially,
+    // so the starting value is markup's responsibility alone. A page load
+    // with no solution computed yet must not claim playback is active.
+    const dom = new JSDOM(html);
+    const solvePlay = dom.window.document.querySelector('#solve-play');
+
+    expect(solvePlay.disabled).toBe(true);
+    expect(solvePlay.getAttribute('aria-pressed')).toBe('false');
+  });
 });
