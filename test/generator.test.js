@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DIFFICULTY_PRESETS, generateLevel } from '../src/game/generator.js';
-import { bfsSolve } from '../src/game/solver.js';
+import { aStarSolve, bfsSolve } from '../src/game/solver.js';
+import { createGameState, isWon, move } from '../src/game/state.js';
 
 describe('generateLevel', () => {
   it('produces the exact same level for the same seed', () => {
@@ -41,6 +42,26 @@ describe('generateLevel', () => {
         const level = generateLevel({ ...preset, seed });
         const path = bfsSolve(level.grid, level.player, level.boxes, { maxStates: 500000 });
         expect(path).not.toBeNull();
+      }
+    },
+  );
+
+  // The app itself only calls bfsSolve for boards at or below the "easy"
+  // preset's cell count and routes everything larger (medium, hard) through
+  // aStarSolve, so that's the path that actually needs covering here.
+  it.each(Object.entries(DIFFICULTY_PRESETS).filter(([name]) => name !== 'easy'))(
+    "aStarSolve's path actually wins the generated %s level",
+    (_name, preset) => {
+      for (const seed of [1, 2, 3]) {
+        const level = generateLevel({ ...preset, seed });
+        const path = aStarSolve(level.grid, level.player, level.boxes, { maxStates: 500000 });
+        expect(path).not.toBeNull();
+
+        let state = createGameState(level);
+        for (const direction of path) {
+          state = move(state, direction);
+        }
+        expect(isWon(state)).toBe(true);
       }
     },
   );
