@@ -169,4 +169,83 @@ describe('main.js DOM wiring', () => {
 
     expect(event.defaultPrevented).toBe(true);
   });
+
+  it('moves the player on a tap/click of an adjacent tile', async () => {
+    // Fixed seed known to start the player at (5, 5) on the easy preset, so
+    // a click on tile (5, 4) is a deterministic "tap above the player".
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    const canvas = document.getElementById('game-canvas');
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: canvas.width, height: canvas.height });
+
+    canvas.dispatchEvent(new window.MouseEvent('click', { clientX: 220, clientY: 180 }));
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+  });
+
+  it('does not move the player on a tap that is not orthogonally adjacent', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    const canvas = document.getElementById('game-canvas');
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: canvas.width, height: canvas.height });
+
+    // Tile (0, 0): a wall, and nowhere near the player at (5, 5).
+    canvas.dispatchEvent(new window.MouseEvent('click', { clientX: 20, clientY: 20 }));
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+  });
+
+  it('resets the move counter but keeps the same level on Reset', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    makeAnyLegalMove();
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+
+    document.getElementById('reset').click();
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+    expect(window.location.search).toBe('?difficulty=easy&seed=11');
+  });
+
+  it('generates a fresh level and resets the move counter on New level', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    makeAnyLegalMove();
+
+    document.getElementById('new-level').click();
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+    expect(document.getElementById('undo').disabled).toBe(true);
+  });
+
+  it('regenerates the level at the new size when the difficulty changes', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    const difficultySelect = document.getElementById('difficulty');
+    difficultySelect.value = 'hard';
+    difficultySelect.dispatchEvent(new window.Event('change'));
+
+    // hard preset is a 9x9 grid at the renderer's 40px tile size.
+    expect(document.getElementById('game-canvas').width).toBe(360);
+    expect(window.location.search).toContain('difficulty=hard');
+  });
+
+  it('reports a successful clipboard write', async () => {
+    Object.defineProperty(window.navigator, 'clipboard', {
+      value: { writeText: vi.fn().mockResolvedValue(undefined) },
+      configurable: true,
+    });
+
+    await importMain();
+    document.getElementById('share').click();
+    await Promise.resolve().then(() => {});
+    await Promise.resolve().then(() => {});
+
+    expect(document.getElementById('status').textContent).toBe('Link copied!');
+  });
 });
