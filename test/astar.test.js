@@ -80,4 +80,31 @@ describe('aStarSolve', () => {
 
     expect(aStarSolve(grid, player, boxes, { maxStates: 1 })).toBeNull();
   });
+
+  it('solves an open room with several boxes where push order is interchangeable', () => {
+    // Regression/coverage: with multiple boxes free to be pushed in any
+    // order, the frontier can rediscover the same (player, boxes) state via
+    // a cheaper path after a costlier one is already queued. This exercises
+    // the stale-entry skip that keeps A* from expanding an outdated node.
+    const grid = borderedGrid(9);
+    grid[1][3] = TILE.TARGET;
+    grid[4][1] = TILE.TARGET;
+    grid[4][2] = TILE.TARGET;
+    grid[4][6] = TILE.TARGET;
+    const player = { x: 7, y: 3 };
+    const boxes = [
+      { x: 5, y: 4 },
+      { x: 1, y: 4 },
+      { x: 6, y: 3 },
+      { x: 3, y: 6 },
+    ];
+
+    const path = aStarSolve(grid, player, boxes);
+
+    expect(path).not.toBeNull();
+    const solved = applyPath(grid, player, boxes, path);
+    expect(
+      solved.boxes.every((box) => grid[box.y][box.x] === TILE.TARGET),
+    ).toBe(true);
+  });
 });
