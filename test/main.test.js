@@ -91,6 +91,24 @@ describe('main.js DOM wiring', () => {
     expect(solvePlay.disabled).toBe(true);
   });
 
+  it.each(['undo', 'redo'])(
+    'is a no-op to click %s with an empty history/future stack, even if invoked directly',
+    async (buttonId) => {
+      // Both buttons start (and normally stay) disabled until there's
+      // something to undo/redo, so MoveHistory#undo/#redo returning false is
+      // only reachable by forcing a click past that disabled state.
+      await importMain();
+
+      const moveCounter = document.getElementById('move-counter').textContent;
+      const button = document.getElementById(buttonId);
+      expect(button.disabled).toBe(true);
+      button.disabled = false;
+
+      expect(() => button.click()).not.toThrow();
+      expect(document.getElementById('move-counter').textContent).toBe(moveCounter);
+    },
+  );
+
   it('redoes an undone move and re-disables once the redo stack is empty', async () => {
     window.history.replaceState(null, '', '?difficulty=easy&seed=11');
     await importMain();
