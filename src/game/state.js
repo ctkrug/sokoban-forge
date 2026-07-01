@@ -17,6 +17,27 @@ export function boxIndexAt(boxes, x, y) {
   return boxes.findIndex((box) => box.x === x && box.y === y);
 }
 
+export function findTargets(grid) {
+  const targets = [];
+  for (let y = 0; y < grid.length; y += 1) {
+    for (let x = 0; x < grid[y].length; x += 1) {
+      if (grid[y][x] === TILE.TARGET) {
+        targets.push({ x, y });
+      }
+    }
+  }
+  return targets;
+}
+
+/** A level is won when every target tile has a box sitting on it. */
+export function isWon(state) {
+  const targets = findTargets(state.grid);
+  return (
+    targets.length > 0 &&
+    targets.every((target) => boxIndexAt(state.boxes, target.x, target.y) !== -1)
+  );
+}
+
 /**
  * Builds a fresh game state from a grid and starting entity positions.
  * `player`/`boxes` are copied so the caller's objects can't be mutated
