@@ -190,6 +190,16 @@ window.addEventListener('keydown', (event) => {
     resetLevel();
     return;
   }
+  // Z/Y mirror the Undo/Redo buttons, the same shortcut pairing used by most
+  // desktop editors - lowercased for the same Caps-Lock/Shift reason as R.
+  if (event.key.toLowerCase() === 'z') {
+    undoMove();
+    return;
+  }
+  if (event.key.toLowerCase() === 'y') {
+    redoMove();
+    return;
+  }
   // Lowercased so Caps Lock or a Shift-held keypress (which reports "W",
   // not "w") still maps to the WASD entries below; the Arrow* keys are
   // unaffected since they have no case to begin with.
