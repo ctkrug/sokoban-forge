@@ -304,6 +304,15 @@ describe('main.js DOM wiring', () => {
     vi.useRealTimers();
   });
 
+  it('reports the move count when a solution is found', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+
+    expect(document.getElementById('status').textContent).toMatch(/^Solution found: \d+ moves?\.$/);
+  });
+
   it('reports when no solution exists from the current position', async () => {
     // Deadlocks the lone box against the left wall (x=1) - it can never be
     // pushed sideways again since that requires standing in the wall at
