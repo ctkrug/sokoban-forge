@@ -26,6 +26,10 @@ h1 {
 canvas {
   border: 2px solid var(--accent);
   image-rendering: pixelated;
+  /* Without this, a quick double-tap to move (e.g. two taps on the same
+     adjacent tile) is interpreted as a double-tap-to-zoom gesture on
+     mobile browsers instead of two moves. */
+  touch-action: manipulation;
 }
 
 #controls,
