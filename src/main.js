@@ -209,7 +209,12 @@ shareButton.addEventListener('click', () => {
 });
 
 const shared = decodeShareParams(window.location.search);
-if (shared && shared.difficulty in DIFFICULTY_PRESETS) {
+// `in` also matches inherited Object.prototype keys (constructor, toString,
+// ...), so a crafted URL like ?difficulty=constructor would pass this check
+// and hand generateLevel a function instead of a preset, crashing on load.
+const hasSharedDifficulty =
+  shared && Object.prototype.hasOwnProperty.call(DIFFICULTY_PRESETS, shared.difficulty);
+if (hasSharedDifficulty) {
   difficultySelect.value = shared.difficulty;
   newLevel(parseSeed(shared.seed));
 } else {
