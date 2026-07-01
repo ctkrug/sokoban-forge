@@ -11,6 +11,7 @@ export default [
         window: 'readonly',
         setInterval: 'readonly',
         clearInterval: 'readonly',
+        URLSearchParams: 'readonly',
       },
     },
     rules: {
