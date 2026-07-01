@@ -74,6 +74,7 @@ function stopPlayback() {
   clearInterval(playTimer);
   playTimer = null;
   solvePlayButton.textContent = 'Play';
+  solvePlayButton.setAttribute('aria-pressed', 'false');
 }
 
 function render() {
@@ -156,6 +157,7 @@ solvePlayButton.addEventListener('click', () => {
     return;
   }
   solvePlayButton.textContent = 'Pause';
+  solvePlayButton.setAttribute('aria-pressed', 'true');
   playTimer = setInterval(stepSolution, playbackIntervalMs());
 });
 

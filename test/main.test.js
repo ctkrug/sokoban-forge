@@ -619,11 +619,13 @@ describe('main.js DOM wiring', () => {
 
     solvePlay.click();
     expect(solvePlay.textContent).toBe('Pause');
+    expect(solvePlay.getAttribute('aria-pressed')).toBe('true');
 
     await vi.runAllTimersAsync();
 
     expect(document.getElementById('status').textContent).toBe('Solved! 🎉');
     expect(solvePlay.textContent).toBe('Play');
+    expect(solvePlay.getAttribute('aria-pressed')).toBe('false');
     expect(solvePlay.disabled).toBe(true);
 
     vi.useRealTimers();
