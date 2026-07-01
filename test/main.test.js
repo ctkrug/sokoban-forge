@@ -349,6 +349,30 @@ describe('main.js DOM wiring', () => {
     expect(window.location.search).toContain('difficulty=hard');
   });
 
+  it('reproduces the exact same level after reloading a shared link', async () => {
+    // The whole point of "Copy link" (README: "Level sharing") is that
+    // reopening the URL regenerates the identical board. generateLevel's
+    // own determinism is covered at the unit level elsewhere - this checks
+    // it end-to-end through the URL -> main.js -> UI path, which a bug in
+    // the query decoding/re-encoding around it wouldn't otherwise catch.
+    window.history.replaceState(null, '', '?difficulty=medium&seed=7');
+    await importMain();
+
+    document.getElementById('solve').click();
+    const firstSolveStatus = document.getElementById('status').textContent;
+    const firstTargetCounter = document.getElementById('target-counter').textContent;
+    expect(firstSolveStatus).toMatch(/^Solution found: \d+ moves?\.$/);
+
+    // Simulate reopening the copied link in a fresh tab/session.
+    setUpDom();
+    window.history.replaceState(null, '', '?difficulty=medium&seed=7');
+    await importMain();
+
+    expect(document.getElementById('target-counter').textContent).toBe(firstTargetCounter);
+    document.getElementById('solve').click();
+    expect(document.getElementById('status').textContent).toBe(firstSolveStatus);
+  });
+
   it('solves a board above the BFS cell threshold via aStarSolve', async () => {
     // The hard preset is 9x9 = 81 cells, above BFS_CELL_THRESHOLD (49), so
     // this is the only path in main.js that actually exercises aStarSolve -
