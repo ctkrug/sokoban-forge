@@ -155,6 +155,20 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
   });
 
+  it('loads a level from a crafted URL with a non-numeric extreme seed', async () => {
+    // parseSeed('Infinity') -> Number('Infinity') = Infinity, a "numeric"
+    // seed that isn't NaN, so it's handed straight to createRng instead of
+    // being treated as a string seed. mulberry32 coerces it with `>>> 0`,
+    // which maps Infinity to 0 rather than throwing - confirm that holds
+    // all the way through a real page load, not just at the rng layer.
+    window.history.replaceState(null, '', '?difficulty=hard&seed=Infinity');
+
+    await expect(importMain()).resolves.toBeTruthy();
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+    expect(document.getElementById('target-counter').textContent).toMatch(/^Boxes on target: [0-2]\/3$/);
+  });
+
   it('falls back to showing the link when the Clipboard API is unavailable', async () => {
     Object.defineProperty(window.navigator, 'clipboard', { value: undefined, configurable: true });
 
