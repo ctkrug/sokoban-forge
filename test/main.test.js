@@ -196,6 +196,25 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
   });
 
+  it.each([
+    ['down', 140, 220],
+    ['left', 100, 180],
+    ['right', 180, 180],
+  ])('moves the player %s on a tap of the tile in that direction', async (_direction, clientX, clientY) => {
+    // Fixed seed known to start the player at (3, 4) with all four
+    // orthogonal neighbors open, so each click deterministically exercises
+    // one branch of the four-way tap-direction check.
+    window.history.replaceState(null, '', '?difficulty=easy&seed=1');
+    await importMain();
+
+    const canvas = document.getElementById('game-canvas');
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: canvas.width, height: canvas.height });
+
+    canvas.dispatchEvent(new window.MouseEvent('click', { clientX, clientY }));
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+  });
+
   it('does not move the player on a tap that is not orthogonally adjacent', async () => {
     window.history.replaceState(null, '', '?difficulty=easy&seed=11');
     await importMain();
