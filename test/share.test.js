@@ -45,4 +45,13 @@ describe('parseSeed', () => {
     // parseSeed is still a plain function — pin down its actual behavior.
     expect(parseSeed('')).toBe(0);
   });
+
+  it('coerces a whitespace-only string to 0, matching Number(" ")', () => {
+    // Number(" ") is 0, not NaN, so unlike "NaN" or "reproducible" a
+    // whitespace-only seed takes the numeric branch rather than being
+    // hashed as a string - same trap as the empty-string case above, but
+    // decodeShareParams's `!seed` guard doesn't catch it since a
+    // non-empty-length string of spaces is truthy.
+    expect(parseSeed('   ')).toBe(0);
+  });
 });
