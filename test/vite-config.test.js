@@ -9,4 +9,13 @@ describe('vite.config.js', () => {
     // the deployment the README promises ("servable from any subpath").
     expect(config.base).toBe('./');
   });
+
+  it('gates the coverage run on 100% across every dimension', () => {
+    expect(config.test.coverage.thresholds).toEqual({
+      statements: 100,
+      branches: 100,
+      functions: 100,
+      lines: 100,
+    });
+  });
 });
