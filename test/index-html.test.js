@@ -6,6 +6,8 @@ import { DIFFICULTY_PRESETS } from '../src/game/generator.js';
 
 const indexPath = fileURLToPath(new URL('../index.html', import.meta.url));
 const html = readFileSync(indexPath, 'utf-8');
+const stylePath = fileURLToPath(new URL('../src/style.css', import.meta.url));
+const style = readFileSync(stylePath, 'utf-8');
 
 describe('index.html', () => {
   it('offers exactly one <option> per difficulty preset, in matching order', () => {
@@ -38,5 +40,17 @@ describe('index.html', () => {
     expect(document.querySelector('#reset').title).toBe('Shortcut: R');
     expect(document.querySelector('#undo').title).toBe('Shortcut: Z');
     expect(document.querySelector('#redo').title).toBe('Shortcut: Y');
+  });
+
+  it('sets theme-color to match the page background, not just any dark shade', () => {
+    // Regression guard: the two are only related by both authors remembering
+    // to update them together - if style.css's --bg ever changes without a
+    // matching edit here, a mobile browser's chrome would visibly mismatch
+    // the page instead of blending into it.
+    const dom = new JSDOM(html);
+    const themeColor = dom.window.document.querySelector('meta[name="theme-color"]').content;
+    const bgVar = style.match(/--bg:\s*(#[0-9a-f]+);/i)[1];
+
+    expect(themeColor).toBe(bgVar);
   });
 });
