@@ -441,6 +441,17 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('status').textContent).toMatch(/^Solution found: \d+ moves?\.$/);
   });
 
+  it('uses singular "move" for a one-move solution', async () => {
+    // Seed 1 on the easy preset is a known one-move solve, the only way to
+    // reach the `path.length === 1` branch of the pluralization ternary.
+    window.history.replaceState(null, '', '?difficulty=easy&seed=1');
+    await importMain();
+
+    document.getElementById('solve').click();
+
+    expect(document.getElementById('status').textContent).toBe('Solution found: 1 move.');
+  });
+
   it('reports when no solution exists from the current position', async () => {
     // Deadlocks the lone box against the left wall (x=1) - it can never be
     // pushed sideways again since that requires standing in the wall at
