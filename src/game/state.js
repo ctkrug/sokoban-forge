@@ -30,3 +30,43 @@ export function createGameState({ grid, player, boxes }) {
     moves: 0,
   };
 }
+
+/**
+ * Attempts to move the player one step in `direction`. Handles both plain
+ * walks and box pushes (a box ahead of the player slides one cell further
+ * in the same direction, provided that cell is clear).
+ *
+ * Returns the same `state` reference, unchanged, when the move is illegal
+ * (wall, board edge, or a push blocked by another wall/box) so callers can
+ * detect a no-op with `===` instead of diffing state.
+ */
+export function move(state, direction) {
+  const delta = DIRECTIONS[direction];
+  if (!delta) {
+    throw new RangeError(`unknown direction: ${direction}`);
+  }
+
+  const nx = state.player.x + delta.dx;
+  const ny = state.player.y + delta.dy;
+  if (!isWalkable(state.grid, nx, ny)) {
+    return state;
+  }
+
+  const pushedIdx = boxIndexAt(state.boxes, nx, ny);
+  let boxes = state.boxes;
+  if (pushedIdx !== -1) {
+    const bx = nx + delta.dx;
+    const by = ny + delta.dy;
+    if (!isWalkable(state.grid, bx, by) || boxIndexAt(state.boxes, bx, by) !== -1) {
+      return state;
+    }
+    boxes = state.boxes.map((box, i) => (i === pushedIdx ? { x: bx, y: by } : box));
+  }
+
+  return {
+    ...state,
+    player: { x: nx, y: ny },
+    boxes,
+    moves: state.moves + 1,
+  };
+}
