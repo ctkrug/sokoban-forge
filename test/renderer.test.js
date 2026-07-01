@@ -44,4 +44,24 @@ describe('drawState', () => {
     expect(ctx.fillStyleLog).toHaveLength(11);
     expect(ctx.fillStyleLog[9]).not.toBe(ctx.fillStyleLog[0]); // box color != floor color
   });
+
+  it('colors a box on its target differently from a box off target', () => {
+    const grid = createEmptyGrid(4, 1);
+    grid[0][1] = TILE.TARGET;
+    const state = {
+      grid,
+      player: { x: 0, y: 0 },
+      boxes: [
+        { x: 1, y: 0 }, // on target
+        { x: 3, y: 0 }, // off target
+      ],
+    };
+    const ctx = createStubContext();
+
+    drawState(ctx, state);
+
+    // 4 tile fills, then the on-target box, then the off-target box.
+    const [onTargetColor, offTargetColor] = ctx.fillStyleLog.slice(4, 6);
+    expect(onTargetColor).not.toBe(offTargetColor);
+  });
 });
