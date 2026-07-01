@@ -9,7 +9,20 @@
   <body>
     <main>
       <h1>Sokoban Forge</h1>
+      <div id="controls">
+        <label for="difficulty">Difficulty</label>
+        <select id="difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+        <button id="new-level" type="button">New level</button>
+        <button id="reset" type="button">Reset</button>
+        <button id="undo" type="button">Undo</button>
+        <span id="move-counter">Moves: 0</span>
+      </div>
       <canvas id="game-canvas" width="400" height="320"></canvas>
+      <p id="status" role="status"></p>
     </main>
     <script type="module" src="./src/main.js"></script>
   </body>
