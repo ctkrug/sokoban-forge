@@ -26,7 +26,8 @@ codebase instead of living in separate toy projects.
 - **Playable Canvas UI** — keyboard (arrows/WASD) and click/tap controls, move counter,
   undo/redo, reset, and a difficulty selector.
 - **On-demand solver visualization** — BFS for small boards, A* with a box-to-target
-  Manhattan heuristic for larger ones; step or auto-play the solution move by move.
+  Manhattan heuristic for larger ones (the status line names which one ran); step or
+  auto-play the solution move by move.
 - **Level sharing** — a level's difficulty and seed live in the URL, so "Copy link"
   reproduces the exact same board for whoever opens it.
 - **No dependencies at runtime** — plain HTML/CSS/JS + Canvas, deployable as a static
