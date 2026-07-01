@@ -28,4 +28,15 @@ describe('index.html', () => {
 
     expect(select.value).toBe('medium');
   });
+
+  it('surfaces the Reset/Undo/Redo keyboard shortcuts as button tooltips', () => {
+    // The shortcuts (R/Z/Y) only otherwise appear in the README - a visitor
+    // who never reads it has no way to discover them from the UI itself.
+    const dom = new JSDOM(html);
+    const { document } = dom.window;
+
+    expect(document.querySelector('#reset').title).toBe('Shortcut: R');
+    expect(document.querySelector('#undo').title).toBe('Shortcut: Z');
+    expect(document.querySelector('#redo').title).toBe('Shortcut: Y');
+  });
 });
