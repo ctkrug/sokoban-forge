@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#1b1e24" />
+    <meta name="theme-color" content="#221a13" />
     <meta
       name="description"
       content="A browser Sokoban puzzle game with procedurally generated, guaranteed-solvable levels and an animated BFS/A* solver."
@@ -11,63 +11,140 @@
     <title>Shove · Endless box puzzles you can always solve</title>
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%232e5c46'/%3E%3Crect x='3' y='3' width='10' height='10' fill='%238a6fd6'/%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23221a13'/%3E%3Crect x='4' y='4' width='8' height='8' rx='1.5' fill='%23c98a4b'/%3E%3Crect x='4' y='7' width='8' height='2' fill='%238a5a2e'/%3E%3C/svg%3E"
     />
-    <script type="module" crossorigin src="./assets/index-D_-I8LDU.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-B26JrM6v.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap"
+    />
+    <script type="module" crossorigin src="./assets/index-BD84XvnS.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DraHLnxb.css">
   </head>
   <body>
+    <header id="brand">
+      <h1 id="wordmark">
+        <svg class="mark" width="34" height="34" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="9" y="6" width="12" height="12" rx="2.5" fill="currentColor" />
+          <rect x="9" y="11" width="12" height="2" fill="#221a13" opacity="0.55" />
+          <path
+            d="M1 12h5M4 9l3 3-3 3"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span>Shove</span>
+      </h1>
+      <p id="tagline">Endless box puzzles you can always solve.</p>
+      <a
+        id="header-repo"
+        href="https://github.com/ctkrug/sokoban-forge"
+        aria-label="View the source on GitHub"
+        >GitHub</a
+      >
+    </header>
+
     <main>
-      <header id="brand">
-        <h1 id="wordmark">
-          <svg class="mark" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="9" y="6" width="12" height="12" rx="2" fill="currentColor" />
-            <path
-              d="M1 12h5M4 9l3 3-3 3"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <span>Shove</span>
-        </h1>
-        <p id="tagline">Endless box puzzles you can always solve.</p>
-      </header>
-      <div id="controls">
-        <label for="difficulty">Difficulty</label>
-        <select id="difficulty">
-          <option value="easy">Easy</option>
-          <option value="medium" selected>Medium</option>
-          <option value="hard">Hard</option>
-        </select>
-        <button id="new-level" type="button">New level</button>
-        <button id="reset" type="button" title="Shortcut: R">Reset</button>
-        <button id="undo" type="button" title="Shortcut: Z">Undo</button>
-        <button id="redo" type="button" title="Shortcut: Y">Redo</button>
-        <button id="share" type="button">Copy link</button>
-        <span id="move-counter" aria-live="polite">Moves: 0</span>
-        <span id="target-counter" aria-live="polite">Boxes on target: 0/0</span>
-      </div>
-      <canvas
-        id="game-canvas"
-        width="400"
-        height="320"
-        role="img"
-        aria-label="Sokoban board: use arrow keys, WASD, or tap an adjacent tile to move"
-      ></canvas>
-      <div id="solver-controls">
-        <button id="solve" type="button">Solve</button>
-        <button id="solve-step" type="button" disabled>Step</button>
-        <button id="solve-play" type="button" disabled aria-pressed="false">Play</button>
-        <label for="solve-speed">Speed</label>
-        <input id="solve-speed" type="range" min="60" max="600" step="20" value="250" />
-      </div>
-      <p id="status" role="status"></p>
-      <footer id="repo-link">
-        <a href="https://github.com/ctkrug/sokoban-forge">View the source on GitHub</a>
-      </footer>
+      <section id="board-panel" aria-label="Puzzle board">
+        <div id="hud">
+          <div class="hud-stat">
+            <span id="move-counter" class="hud-value" aria-live="polite">Moves: 0</span>
+          </div>
+          <div class="hud-stat">
+            <span id="target-counter" class="hud-value" aria-live="polite">Boxes on target: 0/0</span>
+          </div>
+          <div class="hud-stat hud-difficulty">
+            <label class="hud-label" for="difficulty">Difficulty</label>
+            <select id="difficulty">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="board-frame">
+          <canvas
+            id="game-canvas"
+            width="400"
+            height="320"
+            role="img"
+            aria-label="Sokoban board: use arrow keys, WASD, swipe, or tap an adjacent tile to move"
+          ></canvas>
+          <div id="win-overlay" hidden>
+            <div id="win-card" role="dialog" aria-label="Puzzle solved">
+              <p id="win-title">Solved!</p>
+              <p id="win-moves">All crates home in 0 moves.</p>
+              <div id="win-actions">
+                <button id="win-next" type="button" class="primary">Next puzzle</button>
+                <button id="win-replay" type="button">Replay</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="controls">
+          <button id="new-level" type="button" class="primary">New level</button>
+          <button id="reset" type="button" title="Shortcut: R">Reset</button>
+          <button id="undo" type="button" title="Shortcut: Z">Undo</button>
+          <button id="redo" type="button" title="Shortcut: Y">Redo</button>
+          <button id="share" type="button">Copy link</button>
+          <button id="mute" type="button" aria-pressed="false" aria-label="Mute sound">
+            Sound on
+          </button>
+        </div>
+
+        <p id="status" role="status"></p>
+      </section>
+
+      <aside id="sidebar">
+        <section class="card" aria-labelledby="howto-title">
+          <h2 id="howto-title">How to play</h2>
+          <p>
+            You are the keeper. Shove every crate onto a glowing pad. Crates only ever
+            slide one square, and you cannot pull - one shove too many and you may wall a
+            crate in. Undo is not cheating.
+          </p>
+          <ul id="input-hints">
+            <li><strong>Keys</strong> - arrows or WASD walk and shove</li>
+            <li><strong>Touch</strong> - swipe the board, or tap a square next to the keeper</li>
+          </ul>
+        </section>
+
+        <section class="card" aria-labelledby="solver-title">
+          <h2 id="solver-title">Stuck? Watch it solve itself</h2>
+          <p>
+            Every level is generated already proven solvable. The solver replays that
+            proof: BFS on small boards, A* with a distance heuristic on big ones.
+          </p>
+          <div id="solver-controls">
+            <button id="solve" type="button">Solve</button>
+            <button id="solve-step" type="button" disabled>Step</button>
+            <button id="solve-play" type="button" disabled aria-pressed="false">Play</button>
+            <label id="solve-speed-label" for="solve-speed">Speed</label>
+            <input id="solve-speed" type="range" min="60" max="600" step="20" value="250" />
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="keys-title">
+          <h2 id="keys-title">Shortcuts</h2>
+          <dl id="shortcut-list">
+            <div><dt>R</dt><dd>Reset level</dd></div>
+            <div><dt>Z</dt><dd>Undo</dd></div>
+            <div><dt>Y</dt><dd>Redo</dd></div>
+            <div><dt>Esc</dt><dd>Stop solver playback</dd></div>
+          </dl>
+        </section>
+      </aside>
     </main>
+
+    <footer id="repo-link">
+      <a href="https://github.com/ctkrug/sokoban-forge">View the source on GitHub</a>
+      <span class="footer-note">Procedural levels · animated BFS/A* solver · zero-asset synth sound</span>
+    </footer>
   </body>
 </html>
