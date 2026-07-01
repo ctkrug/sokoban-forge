@@ -235,6 +235,93 @@ describe('main.js DOM wiring', () => {
     expect(window.location.search).toContain('difficulty=hard');
   });
 
+  it('steps through a found solution one move at a time until solved', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+    const solveStep = document.getElementById('solve-step');
+    const moveCounter = document.getElementById('move-counter');
+
+    let previousMoves = moveCounter.textContent;
+    while (!solveStep.disabled) {
+      solveStep.click();
+      expect(moveCounter.textContent).not.toBe(previousMoves);
+      previousMoves = moveCounter.textContent;
+    }
+
+    expect(document.getElementById('status').textContent).toBe('Solved! 🎉');
+  });
+
+  it('auto-plays a found solution through to completion', async () => {
+    vi.useFakeTimers();
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+    const solvePlay = document.getElementById('solve-play');
+
+    solvePlay.click();
+    expect(solvePlay.textContent).toBe('Pause');
+
+    await vi.runAllTimersAsync();
+
+    expect(document.getElementById('status').textContent).toBe('Solved! 🎉');
+    expect(solvePlay.textContent).toBe('Play');
+    expect(solvePlay.disabled).toBe(true);
+
+    vi.useRealTimers();
+  });
+
+  it('pauses an in-progress auto-play when clicked again', async () => {
+    vi.useFakeTimers();
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+    const solvePlay = document.getElementById('solve-play');
+
+    solvePlay.click();
+    solvePlay.click();
+
+    expect(solvePlay.textContent).toBe('Play');
+    const movesWhilePaused = document.getElementById('move-counter').textContent;
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(document.getElementById('move-counter').textContent).toBe(movesWhilePaused);
+
+    vi.useRealTimers();
+  });
+
+  it('reports when no solution exists from the current position', async () => {
+    // Deadlocks the lone box against the left wall (x=1) - it can never be
+    // pushed sideways again since that requires standing in the wall at
+    // x=0, so the puzzle becomes permanently unsolvable from here on.
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    for (const key of ['ArrowUp', 'ArrowUp', 'ArrowLeft', 'ArrowLeft', 'ArrowLeft']) {
+      window.dispatchEvent(new window.KeyboardEvent('keydown', { key }));
+    }
+
+    document.getElementById('solve').click();
+
+    expect(document.getElementById('status').textContent).toBe('No solution found from the current position.');
+    expect(document.getElementById('solve-step').disabled).toBe(true);
+  });
+
+  it('falls back to showing the link when the clipboard write itself rejects', async () => {
+    Object.defineProperty(window.navigator, 'clipboard', {
+      value: { writeText: vi.fn().mockRejectedValue(new Error('denied')) },
+      configurable: true,
+    });
+
+    await importMain();
+    document.getElementById('share').click();
+    await vi.waitFor(() => {
+      expect(document.getElementById('status').textContent).toBe(window.location.href);
+    });
+  });
+
   it('reports a successful clipboard write', async () => {
     Object.defineProperty(window.navigator, 'clipboard', {
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
