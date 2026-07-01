@@ -11,7 +11,7 @@ level pack and want more. It generates a fresh box-pushing puzzle every time you
 each one guaranteed to have a solution, and when you get stuck it can find and animate
 the shortest path out. No login, no build step, no backend.
 
-![Screenshot of Shove: a hard board mid-solve, with the solver reporting a 7-move A* solution](docs/screenshot.png)
+![Screenshot of Shove: the amber-lit board with the keeper, a wooden crate, a glowing target pad, and a crate already home](docs/screenshot.png)
 
 ## Why it exists
 
@@ -42,12 +42,20 @@ and watch it work.
 - **Share the exact board.** Copy link puts the difficulty and seed in the URL, so anyone
   who opens it gets the identical puzzle. Good for sending a friend the one that stumped
   you.
-- **Plays anywhere.** Keyboard, mouse, or touch, on desktop or phone. It is plain
+- **Feels like a toy, not a tech demo.** The keeper and crates slide with a 110ms tween,
+  a blocked shove nudges you back, a crate clicking onto its pad pops with a two-note
+  chime, and solving a board rains confetti in the board's own palette. Every sound is
+  synthesized in the browser with the Web Audio API - the game ships zero audio files -
+  and the Sound button remembers your mute choice. Honors `prefers-reduced-motion`.
+- **A board that fits your screen.** The canvas sizes itself to the page and renders at
+  your display's pixel ratio, so tiles stay crisp from a phone to a 5K desktop.
+- **Plays anywhere.** Keyboard, tap, or swipe, on desktop or phone. It is plain
   HTML/CSS/JS and a Canvas, deployable as a static site with no server.
 
 ## How to play
 
-- **Move** with the arrow keys or WASD, or tap a tile right next to the player.
+- **Move** with the arrow keys or WASD; on touch, swipe anywhere on the board or tap a
+  tile right next to the keeper.
 - **Push a box** by walking into it. It slides one tile further if that tile is clear.
 - **Undo** the last move with **Z**, **Redo** with **Y**, **Reset** the board with **R**,
   or press **New level** for a fresh one at the current difficulty.

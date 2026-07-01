@@ -15,11 +15,19 @@ src/
     history.js    MoveHistory — undo/redo stack wrapping state.move()
     generator.js  DIFFICULTY_PRESETS + generateLevel() — reverse-play level generation
     solver.js     bfsSolve() / aStarSolve() — search over (player, boxes) states
-    renderer.js   drawGrid()/drawState() — pure canvas drawing, no game logic
+    renderer.js   drawGrid()/drawState(ctx, state, tileSize, visual) — pure canvas scene
+                  (checkered floor, beveled walls, pulsing target pads, crates, keeper,
+                  confetti); `visual` is the optional animation layer, PALETTE the colors
+    motion.js     pure tween math: slidePosition/bumpOffset/popScale + MOVE/BUMP/POP_MS
+    confetti.js   pure win-celebration particle sim (spawn/step/alpha, injectable rng)
+    audio.js      createAudio() — WebAudio-synthesized SFX (zero assets), lazy context,
+                  mute persisted to localStorage; contextFactory/storage injectable
     share.js      encodeShareParams()/decodeShareParams()/parseSeed() — URL round-trip
-  main.js         DOM wiring: event listeners, render loop, solver playback timer
-  style.css       all presentation; canvas sizing/touch-action live here, not in JS
-index.html        DOM skeleton + element ids main.js binds to
+  main.js         DOM wiring: event listeners, DPR-aware fitCanvas(), the rAF animation
+                  loop (slide/bump/pop/confetti), sound triggers, win overlay, swipe input
+  style.css       all presentation (docs/DESIGN.md tokens); layout, control states,
+                  win-overlay/card animation, responsive + reduced-motion rules
+index.html        DOM skeleton + element ids main.js binds to; loads Fredoka/Nunito Sans
 ```
 
 `main.js` is the only module that touches the DOM. Everything under `src/game/` is pure
