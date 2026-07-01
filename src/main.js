@@ -161,8 +161,14 @@ window.addEventListener('keydown', (event) => {
   }
   // Skip while a form control has focus: the difficulty <select> and the
   // speed <input type="range"> both use arrow keys natively, and hijacking
-  // them here would move the player instead of adjusting the control.
+  // them here would move the player instead of adjusting the control. This
+  // also protects the native type-ahead behavior of <select> (pressing "r"
+  // jumps to the option starting with "r") from being swallowed by Reset.
   if (FORM_CONTROL_TAGS.has(event.target.tagName)) {
+    return;
+  }
+  if (event.key.toLowerCase() === 'r') {
+    resetLevel();
     return;
   }
   // Lowercased so Caps Lock or a Shift-held keypress (which reports "W",
