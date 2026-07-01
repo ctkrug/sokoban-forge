@@ -16,6 +16,7 @@ const difficultySelect = document.getElementById('difficulty');
 const newLevelButton = document.getElementById('new-level');
 const resetButton = document.getElementById('reset');
 const undoButton = document.getElementById('undo');
+const redoButton = document.getElementById('redo');
 const moveCounter = document.getElementById('move-counter');
 const statusLine = document.getElementById('status');
 const solveButton = document.getElementById('solve');
@@ -76,6 +77,7 @@ function render() {
   drawState(ctx, history.state);
   moveCounter.textContent = `Moves: ${history.state.moves}`;
   undoButton.disabled = !history.canUndo();
+  redoButton.disabled = !history.canRedo();
   statusLine.textContent = isWon(history.state) ? 'Solved! 🎉' : '';
 
   const hasSolution = Boolean(solution);
@@ -176,6 +178,14 @@ undoButton.addEventListener('click', () => {
     // Without this, a stale solution/autoplay from before the undo would
     // keep stepping through moves computed for a board state that no
     // longer exists.
+    clearSolution();
+    render();
+  }
+});
+redoButton.addEventListener('click', () => {
+  if (history.redo()) {
+    // Same reasoning as undo: redo also lands on a board a stale solution
+    // wasn't computed for.
     clearSolution();
     render();
   }
