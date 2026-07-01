@@ -25,6 +25,17 @@ describe('encodeShareParams / decodeShareParams', () => {
     // represents - make sure the `!seed` check doesn't confuse the two.
     expect(decodeShareParams('?difficulty=easy&seed=0')).toEqual({ difficulty: 'easy', seed: '0' });
   });
+
+  it('round-trips a string seed containing URL-reserved characters', () => {
+    // A non-numeric seed reaches here as free-form text (e.g. re-encoded
+    // straight from a previously-loaded share URL's own seed param), so it
+    // can itself contain characters like & and = that are meaningful to a
+    // query string - URLSearchParams should percent-encode/decode around
+    // that automatically, but nothing pinned it down directly.
+    const query = encodeShareParams({ difficulty: 'hard', seed: 'a&b=c d' });
+
+    expect(decodeShareParams(query)).toEqual({ difficulty: 'hard', seed: 'a&b=c d' });
+  });
 });
 
 describe('parseSeed', () => {
