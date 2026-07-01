@@ -144,6 +144,11 @@ solvePlayButton.addEventListener('click', () => {
 const FORM_CONTROL_TAGS = new Set(['INPUT', 'SELECT', 'TEXTAREA']);
 
 window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && playTimer) {
+    stopPlayback();
+    render();
+    return;
+  }
   // Skip while a form control has focus: the difficulty <select> and the
   // speed <input type="range"> both use arrow keys natively, and hijacking
   // them here would move the player instead of adjusting the control.
