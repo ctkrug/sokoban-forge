@@ -84,6 +84,25 @@ describe('move', () => {
 
     expect(next.player).toEqual({ x: 3, y: 2 });
     expect(next.boxes).toEqual([{ x: 4, y: 2 }]);
+    expect(next.moves).toBe(1);
+  });
+
+  it('leaves the original state untouched by a push, not just returning a new one', () => {
+    // MoveHistory's undo stack keeps every past state around and expects to
+    // hand it straight back on undo() - if move() ever mutated its input in
+    // place instead of copying, undoing past a push would return a state
+    // that had already been silently advanced.
+    const state = createGameState({
+      grid: gridWithWalls(5, 5),
+      player: { x: 2, y: 2 },
+      boxes: [{ x: 3, y: 2 }],
+    });
+
+    move(state, 'right');
+
+    expect(state.player).toEqual({ x: 2, y: 2 });
+    expect(state.boxes).toEqual([{ x: 3, y: 2 }]);
+    expect(state.moves).toBe(0);
   });
 
   it('refuses to push a box into a wall', () => {
