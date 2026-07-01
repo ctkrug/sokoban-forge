@@ -19,6 +19,15 @@ describe('mulberry32', () => {
     expect(a()).not.toBe(b());
   });
 
+  it('accepts a zero seed rather than treating it as absent', () => {
+    // 0 is falsy, so a naive `seed || fallback` upstream would silently
+    // replace it - pin down that mulberry32 itself has no such trap.
+    const a = mulberry32(0);
+    const b = mulberry32(0);
+
+    expect(a()).toBe(b());
+  });
+
   it('always yields floats in [0, 1)', () => {
     const rng = mulberry32(7);
     for (let i = 0; i < 100; i += 1) {
