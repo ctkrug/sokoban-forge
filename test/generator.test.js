@@ -1,9 +1,23 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DIFFICULTY_PRESETS, generateLevel } from '../src/game/generator.js';
 import { aStarSolve, bfsSolve } from '../src/game/solver.js';
 import { createGameState, isWon, move } from '../src/game/state.js';
 
 describe('generateLevel', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('falls back to Date.now() as the seed when none is given', () => {
+    const params = { width: 8, height: 8, boxCount: 2, scrambleDepth: 20 };
+    vi.spyOn(Date, 'now').mockReturnValue(123456789);
+
+    const withoutSeed = generateLevel(params);
+    const withEquivalentSeed = generateLevel({ ...params, seed: 123456789 });
+
+    expect(withoutSeed).toEqual(withEquivalentSeed);
+  });
+
   it('produces the exact same level for the same seed', () => {
     const params = { width: 8, height: 8, boxCount: 2, scrambleDepth: 20, seed: 'reproducible' };
 
