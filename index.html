@@ -8,7 +8,7 @@
       name="description"
       content="A browser Sokoban puzzle game with procedurally generated, guaranteed-solvable levels and an animated BFS/A* solver."
     />
-    <title>Sokoban Forge</title>
+    <title>Shove · Endless box puzzles you can always solve</title>
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%232e5c46'/%3E%3Crect x='3' y='3' width='10' height='10' fill='%238a6fd6'/%3E%3C/svg%3E"
@@ -17,7 +17,23 @@
   </head>
   <body>
     <main>
-      <h1>Sokoban Forge</h1>
+      <header id="brand">
+        <h1 id="wordmark">
+          <svg class="mark" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="9" y="6" width="12" height="12" rx="2" fill="currentColor" />
+            <path
+              d="M1 12h5M4 9l3 3-3 3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span>Shove</span>
+        </h1>
+        <p id="tagline">Endless box puzzles you can always solve.</p>
+      </header>
       <div id="controls">
         <label for="difficulty">Difficulty</label>
         <select id="difficulty">
@@ -48,6 +64,9 @@
         <input id="solve-speed" type="range" min="60" max="600" step="20" value="250" />
       </div>
       <p id="status" role="status"></p>
+      <footer id="repo-link">
+        <a href="https://github.com/ctkrug/sokoban-forge">View the source on GitHub</a>
+      </footer>
     </main>
     <script type="module" src="./src/main.js"></script>
   </body>
