@@ -54,6 +54,17 @@ describe('index.html', () => {
     expect(themeColor).toBe(bgVar);
   });
 
+  it('links back to the source repository from the page itself', () => {
+    // The landing/app page ships with a visible "View the source" link; a
+    // portfolio piece that can't be traced back to its repo from the page
+    // loses the point of shipping it. Pin the destination so a typo in the
+    // slug doesn't silently point visitors at a 404.
+    const dom = new JSDOM(html);
+    const link = dom.window.document.querySelector('#repo-link a');
+
+    expect(link.getAttribute('href')).toBe('https://github.com/ctkrug/sokoban-forge');
+  });
+
   it('starts the solve-play button disabled and unpressed, matching a fresh load', () => {
     // main.js only ever toggles aria-pressed - it never sets it initially,
     // so the starting value is markup's responsibility alone. A page load
