@@ -49,6 +49,12 @@ describe('generateLevel', () => {
     );
   });
 
+  it('accepts a boxCount that exactly fills the interior but for the player', () => {
+    // 4x4 board has a 2x2 = 4-cell interior; 3 boxes + 1 player exactly
+    // fills it, the boundary just inside the rejection tested above.
+    expect(() => generateLevel({ width: 4, height: 4, boxCount: 3, scrambleDepth: 5, seed: 1 })).not.toThrow();
+  });
+
   it('never produces a level that is already solved on spawn', () => {
     // Regression: a random pull-walk can easily wander for the whole
     // scramble without ever standing next to the lone box on the "easy"
