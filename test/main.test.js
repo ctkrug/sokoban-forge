@@ -282,6 +282,21 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('status').textContent).toMatch(/^Solution found: \d+ moves?\.$/);
   });
 
+  it('is a no-op to step when there is no solution, even if invoked directly', async () => {
+    // The Step button starts (and normally stays) disabled without a
+    // solution, so this guard is never reachable through a real click - it
+    // exists purely so a future change that forgets to keep the disabled
+    // state in sync can't step through a non-existent solution and crash.
+    await importMain();
+
+    const solveStep = document.getElementById('solve-step');
+    expect(solveStep.disabled).toBe(true);
+    solveStep.disabled = false;
+
+    expect(() => solveStep.click()).not.toThrow();
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+  });
+
   it('steps through a found solution one move at a time until solved', async () => {
     window.history.replaceState(null, '', '?difficulty=easy&seed=11');
     await importMain();
