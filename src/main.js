@@ -46,14 +46,32 @@ function render() {
   statusLine.textContent = isWon(history.state) ? 'Solved! 🎉' : '';
 }
 
-window.addEventListener('keydown', (event) => {
-  const direction = KEY_TO_DIRECTION[event.key];
+function tryMove(direction) {
   if (!direction || isWon(history.state)) {
     return;
   }
   if (history.move(direction)) {
     render();
   }
+}
+
+window.addEventListener('keydown', (event) => tryMove(KEY_TO_DIRECTION[event.key]));
+
+/**
+ * Click/tap support: a tap on one of the four tiles orthogonally adjacent
+ * to the player moves in that direction, mirroring the keyboard controls
+ * without requiring a virtual d-pad.
+ */
+canvas.addEventListener('click', (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const tileX = Math.floor(((event.clientX - rect.left) / rect.width) * canvas.width / DEFAULT_TILE_SIZE);
+  const tileY = Math.floor(((event.clientY - rect.top) / rect.height) * canvas.height / DEFAULT_TILE_SIZE);
+  const { x: px, y: py } = history.state.player;
+
+  if (tileX === px && tileY === py - 1) tryMove('up');
+  else if (tileX === px && tileY === py + 1) tryMove('down');
+  else if (tileY === py && tileX === px - 1) tryMove('left');
+  else if (tileY === py && tileX === px + 1) tryMove('right');
 });
 
 difficultySelect.addEventListener('change', () => newLevel());
