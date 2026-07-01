@@ -80,6 +80,15 @@ describe('generateLevel', () => {
     },
   );
 
+  it('re-rolls a scramble that dead-ends before any box leaves its target', () => {
+    // Regression: seed 4306 on the "hard" preset used to hit a player-move
+    // dead end (no legal pull in any direction) on its very first scramble
+    // step, before any of the 3 boxes moved off their target - shipping a
+    // board that looked already solved on load.
+    const level = generateLevel({ ...DIFFICULTY_PRESETS.hard, seed: 4306 });
+    expect(isWon(createGameState(level))).toBe(false);
+  });
+
   it.each(Object.entries(DIFFICULTY_PRESETS))(
     'always generates a solvable level for the %s preset',
     (_name, preset) => {
