@@ -73,3 +73,125 @@ export function bfsSolve(grid, player, boxes, { maxStates = 200000 } = {}) {
 
   return null;
 }
+
+function manhattan(a, b) {
+  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+}
+
+/**
+ * Sum, over each box, of the Manhattan distance to its nearest target.
+ * Admissible (never overestimates the true cost) because every push moves
+ * exactly one box exactly one tile, so it can't lead A* to an unsolved
+ * board while a lower-cost solution exists.
+ */
+function boxToTargetHeuristic(boxes, targets) {
+  let total = 0;
+  for (const box of boxes) {
+    let best = Infinity;
+    for (const target of targets) {
+      const d = manhattan(box, target);
+      if (d < best) {
+        best = d;
+      }
+    }
+    total += best;
+  }
+  return total;
+}
+
+/** Minimal binary min-heap keyed by `priority`, used by the A* frontier. */
+class MinHeap {
+  constructor() {
+    this.items = [];
+  }
+
+  get size() {
+    return this.items.length;
+  }
+
+  push(priority, value) {
+    this.items.push({ priority, value });
+    let i = this.items.length - 1;
+    while (i > 0) {
+      const parent = (i - 1) >> 1;
+      if (this.items[parent].priority <= this.items[i].priority) {
+        break;
+      }
+      [this.items[parent], this.items[i]] = [this.items[i], this.items[parent]];
+      i = parent;
+    }
+  }
+
+  pop() {
+    const top = this.items[0];
+    const last = this.items.pop();
+    if (this.items.length > 0) {
+      this.items[0] = last;
+      let i = 0;
+      for (;;) {
+        const left = 2 * i + 1;
+        const right = 2 * i + 2;
+        let smallest = i;
+        if (left < this.items.length && this.items[left].priority < this.items[smallest].priority) {
+          smallest = left;
+        }
+        if (right < this.items.length && this.items[right].priority < this.items[smallest].priority) {
+          smallest = right;
+        }
+        if (smallest === i) {
+          break;
+        }
+        [this.items[i], this.items[smallest]] = [this.items[smallest], this.items[i]];
+        i = smallest;
+      }
+    }
+    return top.value;
+  }
+}
+
+/**
+ * A* search using the box-to-target Manhattan heuristic. Explores far
+ * fewer states than plain BFS on larger boards because the heuristic
+ * steers the frontier toward the goal instead of expanding uniformly.
+ */
+export function aStarSolve(grid, player, boxes, { maxStates = 200000 } = {}) {
+  if (isSolved(grid, boxes)) {
+    return [];
+  }
+
+  const targets = findTargets(grid);
+  const gScore = new Map();
+  const startKey = serialize(player, boxes);
+  gScore.set(startKey, 0);
+
+  const frontier = new MinHeap();
+  frontier.push(boxToTargetHeuristic(boxes, targets), { player, boxes, path: [] });
+
+  let explored = 0;
+  while (frontier.size > 0 && explored < maxStates) {
+    const current = frontier.pop();
+    explored += 1;
+    const currentKey = serialize(current.player, current.boxes);
+    if (current.path.length > (gScore.get(currentKey) ?? Infinity)) {
+      continue; // a cheaper path to this state was already processed
+    }
+
+    for (const next of neighbors(grid, current)) {
+      const key = serialize(next.player, next.boxes);
+      const g = current.path.length + 1;
+      if (g >= (gScore.get(key) ?? Infinity)) {
+        continue;
+      }
+      gScore.set(key, g);
+
+      const path = [...current.path, next.direction];
+      if (isSolved(grid, next.boxes)) {
+        return path;
+      }
+      const f = g + boxToTargetHeuristic(next.boxes, targets);
+      frontier.push(f, { player: next.player, boxes: next.boxes, path });
+    }
+  }
+
+  return null;
+}
