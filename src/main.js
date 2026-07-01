@@ -3,6 +3,7 @@ import { MoveHistory } from './game/history.js';
 import { createGameState, isWon } from './game/state.js';
 import { DEFAULT_TILE_SIZE, drawState } from './game/renderer.js';
 import { aStarSolve, bfsSolve } from './game/solver.js';
+import { decodeShareParams, encodeShareParams } from './game/share.js';
 
 // Below this many reachable board cells, plain BFS explores the state
 // space fast enough; larger boards switch to A* so the heuristic keeps
@@ -21,6 +22,7 @@ const solveButton = document.getElementById('solve');
 const solveStepButton = document.getElementById('solve-step');
 const solvePlayButton = document.getElementById('solve-play');
 const solveSpeedInput = document.getElementById('solve-speed');
+const shareButton = document.getElementById('share');
 
 const KEY_TO_DIRECTION = {
   ArrowUp: 'up',
@@ -45,7 +47,18 @@ function newLevel(seed = Date.now()) {
   canvas.height = currentLevel.grid.length * DEFAULT_TILE_SIZE;
   history = new MoveHistory(createGameState(currentLevel));
   clearSolution();
+
+  const query = encodeShareParams({ difficulty: difficultySelect.value, seed });
+  window.history.replaceState(null, '', query);
+
   render();
+}
+
+/** A numeric-looking seed round-trips through the URL as a string; convert
+ * it back to a number so it reproduces the exact same level. */
+function parseSeed(rawSeed) {
+  const asNumber = Number(rawSeed);
+  return Number.isNaN(asNumber) ? rawSeed : asNumber;
 }
 
 function resetLevel() {
@@ -155,4 +168,21 @@ undoButton.addEventListener('click', () => {
   }
 });
 
-newLevel();
+shareButton.addEventListener('click', () => {
+  navigator.clipboard
+    .writeText(window.location.href)
+    .then(() => {
+      statusLine.textContent = 'Link copied!';
+    })
+    .catch(() => {
+      statusLine.textContent = window.location.href;
+    });
+});
+
+const shared = decodeShareParams(window.location.search);
+if (shared && shared.difficulty in DIFFICULTY_PRESETS) {
+  difficultySelect.value = shared.difficulty;
+  newLevel(parseSeed(shared.seed));
+} else {
+  newLevel();
+}
