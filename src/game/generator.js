@@ -80,7 +80,16 @@ export function generateLevel({ width, height, boxCount, scrambleDepth, seed }) 
   let boxes = targets.map((target) => ({ ...target }));
   let player = { ...shuffled[boxCount] };
 
-  for (let step = 0; step < scrambleDepth; step += 1) {
+  // A random walk can easily wander for the whole scramble without ever
+  // standing next to a box, especially with few boxes on a small board -
+  // leaving every box exactly on its target, i.e. a level that's already
+  // "solved" on load. Keep scrambling past scrambleDepth until at least one
+  // box has actually left its target, bounded so a genuine dead end (no
+  // legal pull at all) still terminates instead of looping forever.
+  const stillSolved = () => targets.every((target) => boxIndexAt(boxes, target.x, target.y) !== -1);
+  const maxSteps = Math.max(scrambleDepth * 50, 1000);
+
+  for (let step = 0; step < maxSteps && (step < scrambleDepth || stillSolved()); step += 1) {
     const candidates = [];
     for (const dir of shuffle(PULL_DIRECTIONS, rng)) {
       const px = player.x + dir.dx;

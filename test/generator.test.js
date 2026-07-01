@@ -35,6 +35,18 @@ describe('generateLevel', () => {
     );
   });
 
+  it('never produces a level that is already solved on spawn', () => {
+    // Regression: a random pull-walk can easily wander for the whole
+    // scramble without ever standing next to the lone box on the "easy"
+    // preset (boxCount: 1), leaving it exactly on its target - a level
+    // that looks "solved" before the player makes a single move. This
+    // used to happen for the large majority of seeds.
+    for (let seed = 1; seed <= 500; seed += 1) {
+      const level = generateLevel({ ...DIFFICULTY_PRESETS.easy, seed });
+      expect(isWon(createGameState(level))).toBe(false);
+    }
+  });
+
   it.each(Object.entries(DIFFICULTY_PRESETS))(
     'always generates a solvable level for the %s preset',
     (_name, preset) => {
