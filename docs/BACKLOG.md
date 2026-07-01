@@ -26,14 +26,14 @@ The search algorithms and the animation that makes the solve visible to the play
 
 - [x] Implement a BFS solver for small boards
 - [x] Implement an A* solver with a box-to-target distance heuristic for larger boards
-- [ ] Animate the found solution path move-by-move on the canvas
-- [ ] Add solver playback controls (play/pause/step, speed)
+- [x] Animate the found solution path move-by-move on the canvas
+- [x] Add solver playback controls (play/pause/step, speed)
 
 ## Epic 4 — Playable UI and deployment
 
 Turning the engine into something a visitor can actually play and share.
 
-- [ ] Add keyboard and touch/click input handling for movement
-- [ ] Add UI chrome: move counter, reset button, difficulty selector
-- [ ] Add level sharing via a URL-encoded seed/state, and verify the production
+- [x] Add keyboard and touch/click input handling for movement
+- [x] Add UI chrome: move counter, reset button, difficulty selector
+- [x] Add level sharing via a URL-encoded seed/state, and verify the production
       build is fully relative-path and deploys cleanly under a subpath
