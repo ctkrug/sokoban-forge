@@ -19,6 +19,12 @@ describe('encodeShareParams / decodeShareParams', () => {
   it('returns null for an empty query string', () => {
     expect(decodeShareParams('')).toBeNull();
   });
+
+  it('accepts a seed of "0" instead of treating it as missing', () => {
+    // "0" is a non-empty string (truthy), unlike the numeric 0 it
+    // represents - make sure the `!seed` check doesn't confuse the two.
+    expect(decodeShareParams('?difficulty=easy&seed=0')).toEqual({ difficulty: 'easy', seed: '0' });
+  });
 });
 
 describe('parseSeed', () => {
