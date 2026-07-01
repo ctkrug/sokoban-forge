@@ -36,7 +36,7 @@ codebase instead of living in separate toy projects.
 
 - **Move:** arrow keys or WASD, or click/tap a tile directly next to the player.
 - **Push a box** by walking into it — it slides one tile further, if that tile is clear.
-- **Undo** the last move (or **Redo** it back), **Reset** the level back to its start
+- **Undo** the last move (**Z**) or **Redo** it back (**Y**), **Reset** the level back to its start
   (or press **R**), or **New level** to generate another one at the selected difficulty.
 - **Solve** runs the solver from the current position; **Step** advances the found
   solution one move, **Play** animates it automatically (speed adjustable, or press
