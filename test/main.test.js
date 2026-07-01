@@ -382,6 +382,34 @@ describe('main.js DOM wiring', () => {
     vi.useRealTimers();
   });
 
+  it('stops an in-progress auto-play on Escape', async () => {
+    vi.useFakeTimers();
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+    const solvePlay = document.getElementById('solve-play');
+    solvePlay.click();
+    expect(solvePlay.textContent).toBe('Pause');
+
+    window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
+
+    expect(solvePlay.textContent).toBe('Play');
+    const movesAfterEscape = document.getElementById('move-counter').textContent;
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(document.getElementById('move-counter').textContent).toBe(movesAfterEscape);
+
+    vi.useRealTimers();
+  });
+
+  it('ignores Escape when auto-play is not running', async () => {
+    await importMain();
+
+    expect(() =>
+      window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' })),
+    ).not.toThrow();
+  });
+
   it('reports the move count when a solution is found', async () => {
     window.history.replaceState(null, '', '?difficulty=easy&seed=11');
     await importMain();
