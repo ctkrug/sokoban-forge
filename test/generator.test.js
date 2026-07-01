@@ -58,6 +58,20 @@ describe('generateLevel', () => {
     ).toThrow(/must fit the interior/);
   });
 
+  it('rejects a negative scrambleDepth', () => {
+    // Without this guard, a negative scrambleDepth silently degraded to the
+    // same behavior as 0 instead of failing fast on the bad input.
+    expect(() =>
+      generateLevel({ width: 8, height: 8, boxCount: 2, scrambleDepth: -1, seed: 1 }),
+    ).toThrow(/scrambleDepth must be a non-negative integer/);
+  });
+
+  it('accepts a scrambleDepth of exactly 0', () => {
+    expect(() =>
+      generateLevel({ width: 8, height: 8, boxCount: 2, scrambleDepth: 0, seed: 1 }),
+    ).not.toThrow();
+  });
+
   it('rejects a boxCount that leaves no room for the player', () => {
     // 4x4 board has a 2x2 = 4-cell interior; 4 boxes leaves nowhere to stand.
     expect(() => generateLevel({ width: 4, height: 4, boxCount: 4, scrambleDepth: 5, seed: 1 })).toThrow(
