@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { TILE, createEmptyGrid } from '../src/game/grid.js';
-import { countBoxesOnTarget, createGameState, move } from '../src/game/state.js';
+import { boxIndexAt, countBoxesOnTarget, createGameState, findTargets, move } from '../src/game/state.js';
 
 function gridWithWalls(width, height, walls = []) {
   const grid = createEmptyGrid(width, height);
@@ -138,5 +138,41 @@ describe('countBoxesOnTarget', () => {
     const state = createGameState({ grid: gridWithWalls(4, 4), player: { x: 0, y: 0 }, boxes: [] });
 
     expect(countBoxesOnTarget(state)).toBe(0);
+  });
+});
+
+describe('boxIndexAt', () => {
+  const boxes = [
+    { x: 1, y: 1 },
+    { x: 2, y: 2 },
+  ];
+
+  it('returns the index of the box at the given coordinates', () => {
+    expect(boxIndexAt(boxes, 2, 2)).toBe(1);
+  });
+
+  it('returns -1 when no box is at the given coordinates', () => {
+    expect(boxIndexAt(boxes, 5, 5)).toBe(-1);
+  });
+
+  it('returns -1 for an empty boxes array', () => {
+    expect(boxIndexAt([], 0, 0)).toBe(-1);
+  });
+});
+
+describe('findTargets', () => {
+  it('collects every target tile in row-major order', () => {
+    const grid = gridWithWalls(3, 3);
+    grid[0][2] = TILE.TARGET;
+    grid[2][0] = TILE.TARGET;
+
+    expect(findTargets(grid)).toEqual([
+      { x: 2, y: 0 },
+      { x: 0, y: 2 },
+    ]);
+  });
+
+  it('returns an empty array when there are no targets', () => {
+    expect(findTargets(gridWithWalls(3, 3))).toEqual([]);
   });
 });
