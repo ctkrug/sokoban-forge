@@ -1,6 +1,6 @@
 import { DIFFICULTY_PRESETS, generateLevel } from './game/generator.js';
 import { MoveHistory } from './game/history.js';
-import { createGameState, isWon } from './game/state.js';
+import { countBoxesOnTarget, createGameState, findTargets, isWon } from './game/state.js';
 import { DEFAULT_TILE_SIZE, drawState } from './game/renderer.js';
 import { aStarSolve, bfsSolve } from './game/solver.js';
 import { decodeShareParams, encodeShareParams, parseSeed } from './game/share.js';
@@ -18,6 +18,7 @@ const resetButton = document.getElementById('reset');
 const undoButton = document.getElementById('undo');
 const redoButton = document.getElementById('redo');
 const moveCounter = document.getElementById('move-counter');
+const targetCounter = document.getElementById('target-counter');
 const statusLine = document.getElementById('status');
 const solveButton = document.getElementById('solve');
 const solveStepButton = document.getElementById('solve-step');
@@ -78,6 +79,7 @@ function stopPlayback() {
 function render() {
   drawState(ctx, history.state);
   moveCounter.textContent = `Moves: ${history.state.moves}`;
+  targetCounter.textContent = `Boxes on target: ${countBoxesOnTarget(history.state)}/${findTargets(history.state.grid).length}`;
   undoButton.disabled = !history.canUndo();
   redoButton.disabled = !history.canRedo();
   statusLine.textContent = isWon(history.state) ? 'Solved! 🎉' : '';
