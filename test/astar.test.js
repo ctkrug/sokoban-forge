@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { TILE, createEmptyGrid } from '../src/game/grid.js';
 import { createGameState, move } from '../src/game/state.js';
 import { aStarSolve, bfsSolve } from '../src/game/solver.js';
+import { DIFFICULTY_PRESETS, generateLevel } from '../src/game/generator.js';
 
 function applyPath(grid, player, boxes, path) {
   let state = createGameState({ grid, player, boxes });
@@ -107,4 +108,25 @@ describe('aStarSolve', () => {
       solved.boxes.every((box) => grid[box.y][box.x] === TILE.TARGET),
     ).toBe(true);
   });
+
+  it.each(Object.entries(DIFFICULTY_PRESETS))(
+    "always agrees with BFS's optimal path length on generated %s levels",
+    (_name, preset) => {
+      // A* trades BFS's exhaustive frontier for a heuristic-guided one - if
+      // the heuristic were ever non-admissible (overestimating the true
+      // cost), A* could return a *longer* path than BFS's guaranteed-optimal
+      // one without either solver reporting an error. Check agreement across
+      // many seeds per preset, not just the one or two hand-picked boards
+      // covered elsewhere in this file.
+      for (let seed = 1; seed <= 15; seed += 1) {
+        const level = generateLevel({ ...preset, seed });
+        const bfsPath = bfsSolve(level.grid, level.player, level.boxes, { maxStates: 500000 });
+        const aStarPath = aStarSolve(level.grid, level.player, level.boxes, { maxStates: 500000 });
+
+        expect(bfsPath).not.toBeNull();
+        expect(aStarPath).not.toBeNull();
+        expect(aStarPath.length).toBe(bfsPath.length);
+      }
+    },
+  );
 });
