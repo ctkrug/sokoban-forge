@@ -1190,7 +1190,10 @@ describe('design layer: sound, swipe, win moment, responsive board', () => {
     makeAnyLegalMove();
     expect(raf.pending).toBeGreaterThan(0); // the move scheduled a tween frame
 
-    let now = 1000;
+    // Anchor the synthetic clock to the real one: the animation's start
+    // was stamped with performance.now(), so a fixed literal here would
+    // sit in the past on a slow (e.g. coverage) run and never settle.
+    let now = performance.now() + 50;
     let guard = 100;
     while (raf.flush(now) > 0 && guard > 0) {
       now += 50;
@@ -1219,7 +1222,7 @@ describe('design layer: sound, swipe, win moment, responsive board', () => {
     }
     expect(guard).toBeGreaterThan(0);
 
-    let now = 5000;
+    let now = performance.now() + 40;
     guard = 100;
     while (raf.flush(now) > 0 && guard > 0) {
       now += 40;
@@ -1236,7 +1239,7 @@ describe('design layer: sound, swipe, win moment, responsive board', () => {
     winViaSolver();
     expect(raf.pending).toBeGreaterThan(0); // celebration is animating
 
-    let now = 10_000;
+    let now = performance.now() + 400;
     let guard = 200;
     while (raf.flush(now) > 0 && guard > 0) {
       now += 400; // big steps so the 1.8s confetti life expires quickly
