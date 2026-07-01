@@ -26,6 +26,7 @@ export default [
         process: 'readonly',
         HTMLCanvasElement: 'readonly',
         performance: 'readonly',
+        URL: 'readonly',
       },
     },
   },
