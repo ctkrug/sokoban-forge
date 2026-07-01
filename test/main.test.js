@@ -124,6 +124,18 @@ describe('main.js DOM wiring', () => {
     expect(solveStep.disabled).toBe(true);
   });
 
+  it('ignores an inherited Object.prototype key as a shared difficulty', async () => {
+    // Regression: `shared.difficulty in DIFFICULTY_PRESETS` also matches
+    // inherited keys like "constructor" or "toString", handing generateLevel
+    // a function instead of a preset and crashing on load.
+    window.history.replaceState(null, '', '?difficulty=constructor&seed=1');
+
+    await expect(importMain()).resolves.toBeTruthy();
+
+    expect(document.getElementById('difficulty').value).toBe('easy');
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+  });
+
   it('falls back to showing the link when the Clipboard API is unavailable', async () => {
     Object.defineProperty(window.navigator, 'clipboard', { value: undefined, configurable: true });
 
