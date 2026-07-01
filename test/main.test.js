@@ -363,6 +363,28 @@ describe('main.js DOM wiring', () => {
     vi.useRealTimers();
   });
 
+  it('plays faster when the speed slider is set higher', async () => {
+    // Regression: the slider's raw value is the millisecond delay between
+    // steps, so wiring it straight into setInterval meant dragging "Speed"
+    // up actually made playback slower, not faster.
+    vi.useFakeTimers();
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+    document.getElementById('solve-speed').value = document.getElementById('solve-speed').max;
+    document.getElementById('solve-play').click();
+
+    // Max slider value must invert to the shortest interval (the slider's
+    // own min), so a single step fires well before the slider's raw value
+    // (600ms) would have.
+    await vi.advanceTimersByTimeAsync(100);
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+
+    vi.useRealTimers();
+  });
+
   it('pauses an in-progress auto-play when clicked again', async () => {
     vi.useFakeTimers();
     window.history.replaceState(null, '', '?difficulty=easy&seed=11');
