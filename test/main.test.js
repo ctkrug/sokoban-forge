@@ -433,6 +433,28 @@ describe('main.js DOM wiring', () => {
     vi.useRealTimers();
   });
 
+  it('stops an in-progress auto-play when Solve is clicked again', async () => {
+    // Regression: re-solving mid-playback used to swap the solution/index
+    // being stepped through without ever stopping the running interval, so
+    // the "Pause" label kept describing playback the click didn't ask for.
+    vi.useFakeTimers();
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+    document.getElementById('solve-play').click();
+    expect(document.getElementById('solve-play').textContent).toBe('Pause');
+
+    document.getElementById('solve').click();
+
+    expect(document.getElementById('solve-play').textContent).toBe('Play');
+    const movesAfterResolve = document.getElementById('move-counter').textContent;
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(document.getElementById('move-counter').textContent).toBe(movesAfterResolve);
+
+    vi.useRealTimers();
+  });
+
   it('plays faster when the speed slider is set higher', async () => {
     // Regression: the slider's raw value is the millisecond delay between
     // steps, so wiring it straight into setInterval meant dragging "Speed"
