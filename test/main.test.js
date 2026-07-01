@@ -553,6 +553,30 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('status').textContent).toBe('Solved! 🎉');
   });
 
+  it('ignores further keyboard moves once the board is won', async () => {
+    // tryMove's `isWon(history.state)` guard is otherwise never exercised -
+    // every other movement test plays on an unsolved board. Without it, a
+    // player could keep pushing the box(es) around a "solved" board, which
+    // would desync the visible "Solved!" status from the board underneath.
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+    const solveStep = document.getElementById('solve-step');
+    while (!solveStep.disabled) {
+      solveStep.click();
+    }
+    expect(document.getElementById('status').textContent).toBe('Solved! 🎉');
+    const movesAtWin = document.getElementById('move-counter').textContent;
+
+    for (const key of DIRECTION_KEYS) {
+      window.dispatchEvent(new window.KeyboardEvent('keydown', { key }));
+    }
+
+    expect(document.getElementById('move-counter').textContent).toBe(movesAtWin);
+    expect(document.getElementById('status').textContent).toBe('Solved! 🎉');
+  });
+
   it('updates the boxes-on-target counter as the solver steps toward the win', async () => {
     // The easy preset always has exactly one box, so solving it fully must
     // walk the counter from 0/1 to 1/1.
