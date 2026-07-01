@@ -207,6 +207,26 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('status').textContent).toBe(firstSolveStatus);
   });
 
+  it('reproduces the same level from a crafted URL with a URL-reserved string seed', async () => {
+    // A non-numeric seed containing characters like & and = is exactly the
+    // case test/share.test.js pins at the encode/decode-function level - this
+    // confirms the same round-trip holds through an actual page load, not
+    // just the pure functions in isolation.
+    const seed = encodeURIComponent('a&b=c d');
+    window.history.replaceState(null, '', `?difficulty=easy&seed=${seed}`);
+    await importMain();
+    document.getElementById('solve').click();
+    const firstSolveStatus = document.getElementById('status').textContent;
+    expect(firstSolveStatus).toMatch(/^Solution found via BFS: \d+ moves?\.$/);
+
+    setUpDom();
+    window.history.replaceState(null, '', `?difficulty=easy&seed=${seed}`);
+    await importMain();
+    document.getElementById('solve').click();
+
+    expect(document.getElementById('status').textContent).toBe(firstSolveStatus);
+  });
+
   it('falls back to showing the link when the Clipboard API is unavailable', async () => {
     Object.defineProperty(window.navigator, 'clipboard', { value: undefined, configurable: true });
 
