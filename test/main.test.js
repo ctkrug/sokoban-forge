@@ -348,6 +348,23 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
   });
 
+  it('does not move the player on a tap of the player\'s own tile', async () => {
+    // A click on (px, py) itself matches none of the four directional
+    // branches (each requires an offset of exactly ±1 on one axis) - a
+    // distinct case from a tap that's merely far away, since tapping your
+    // own token is a realistic stray/double tap rather than a wild miss.
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    const canvas = document.getElementById('game-canvas');
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: canvas.width, height: canvas.height });
+
+    // Player starts at (5, 5); tile (5, 5) itself is 220,220 at a 40px tile.
+    canvas.dispatchEvent(new window.MouseEvent('click', { clientX: 220, clientY: 220 }));
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+  });
+
   it('resets the move counter but keeps the same level on Reset', async () => {
     window.history.replaceState(null, '', '?difficulty=easy&seed=11');
     await importMain();
