@@ -51,6 +51,16 @@ describe('xmur3', () => {
     expect(() => xmur3('')()).not.toThrow();
     expect(xmur3('')()).toBe(xmur3('')());
   });
+
+  it('hashes a string containing multi-byte characters deterministically', () => {
+    // charCodeAt walks UTF-16 code units, so an astral character (e.g. an
+    // emoji) is seen as a surrogate pair rather than one code point - still
+    // fine for a hash (it just needs to be a deterministic function of the
+    // string), but worth pinning down since a shared level code is free-form
+    // user-facing text.
+    expect(xmur3('sököbän 📦')()).toBe(xmur3('sököbän 📦')());
+    expect(xmur3('sököbän 📦')()).not.toBe(xmur3('sokoban')());
+  });
 });
 
 describe('createRng', () => {
