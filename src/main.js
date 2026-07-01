@@ -157,6 +157,10 @@ newLevelButton.addEventListener('click', () => newLevel());
 resetButton.addEventListener('click', () => resetLevel());
 undoButton.addEventListener('click', () => {
   if (history.undo()) {
+    // Without this, a stale solution/autoplay from before the undo would
+    // keep stepping through moves computed for a board state that no
+    // longer exists.
+    clearSolution();
     render();
   }
 });
