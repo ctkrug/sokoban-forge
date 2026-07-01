@@ -17,19 +17,31 @@ it around so it can replay the proof as an animation. It's a small, self-contain
 demonstration of procedural content generation and heuristic search sharing one
 codebase instead of living in separate toy projects.
 
-## Features (planned)
+## Features
 
 - **Procedural level generation** — reverse-play generation (pull moves from a solved
   state) guarantees every generated level has at least one solution.
-- **Difficulty tuning** — grid size, box count, and reverse-play depth scale difficulty
-  up or down.
-- **Playable Canvas UI** — keyboard/touch controls, move counter, undo, level reset.
-- **On-demand solver visualization** — BFS for small boards, A* with a
-  Sokoban-specific heuristic (e.g. box-to-target assignment distance) for larger ones;
-  animates the solution path move by move.
-- **Level sharing** — encode a level's seed/state into a shareable URL.
+- **Difficulty tuning** — easy/medium/hard presets scale grid size, box count, and
+  reverse-play depth.
+- **Playable Canvas UI** — keyboard (arrows/WASD) and click/tap controls, move counter,
+  undo, reset, and a difficulty selector.
+- **On-demand solver visualization** — BFS for small boards, A* with a box-to-target
+  Manhattan heuristic for larger ones; step or auto-play the solution move by move.
+- **Level sharing** — a level's difficulty and seed live in the URL, so "Copy link"
+  reproduces the exact same board for whoever opens it.
 - **No dependencies at runtime** — plain HTML/CSS/JS + Canvas, deployable as a static
   site.
+
+## How to play
+
+- **Move:** arrow keys or WASD, or click/tap a tile directly next to the player.
+- **Push a box** by walking into it — it slides one tile further, if that tile is clear.
+- **Undo** the last move, **Reset** the level back to its start, or **New level** to
+  generate another one at the selected difficulty.
+- **Solve** runs the solver from the current position; **Step** advances the found
+  solution one move, **Play** animates it automatically (speed adjustable).
+- **Copy link** puts a URL encoding the current level's difficulty and seed on your
+  clipboard — opening it regenerates the identical board.
 
 ## Stack
 
@@ -42,8 +54,9 @@ codebase instead of living in separate toy projects.
 
 ## Status
 
-Early scope/scaffold stage. See [`docs/VISION.md`](docs/VISION.md) for the design and
-[`docs/BACKLOG.md`](docs/BACKLOG.md) for the build plan.
+Core gameplay, generation, and solving are functionally complete. See
+[`docs/VISION.md`](docs/VISION.md) for the design and [`docs/BACKLOG.md`](docs/BACKLOG.md)
+for the build plan.
 
 ## Development
 
@@ -51,7 +64,8 @@ Early scope/scaffold stage. See [`docs/VISION.md`](docs/VISION.md) for the desig
 npm install
 npm test        # run unit tests
 npm run lint     # lint source
-npm run dev       # local dev server
+npm run dev      # local dev server
+npm run build    # production build to dist/
 ```
 
 ## License
