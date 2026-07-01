@@ -53,6 +53,9 @@ export function generateLevel({ width, height, boxCount, scrambleDepth, seed }) 
   if (!Number.isInteger(boxCount) || boxCount < 1 || boxCount + 1 > interiorCells) {
     throw new RangeError('boxCount must fit the interior with room left for the player');
   }
+  if (!Number.isInteger(scrambleDepth) || scrambleDepth < 0) {
+    throw new RangeError('scrambleDepth must be a non-negative integer');
+  }
 
   const rng = createRng(seed ?? Date.now());
   const grid = createEmptyGrid(width, height);
