@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { TILE, createEmptyGrid } from '../src/game/grid.js';
-import { boxIndexAt, countBoxesOnTarget, createGameState, findTargets, move } from '../src/game/state.js';
+import {
+  boxIndexAt,
+  countBoxesOnTarget,
+  createGameState,
+  findTargets,
+  isBoardSolved,
+  move,
+} from '../src/game/state.js';
 
 function gridWithWalls(width, height, walls = []) {
   const grid = createEmptyGrid(width, height);
@@ -138,6 +145,30 @@ describe('countBoxesOnTarget', () => {
     const state = createGameState({ grid: gridWithWalls(4, 4), player: { x: 0, y: 0 }, boxes: [] });
 
     expect(countBoxesOnTarget(state)).toBe(0);
+  });
+});
+
+describe('isBoardSolved', () => {
+  // isWon and the solver's goal check both delegate to this directly, so
+  // its own behavior is exercised indirectly all over the suite already -
+  // these pin down the function's contract in isolation, independent of
+  // either caller.
+  it('is true when every target has a box on it', () => {
+    const grid = gridWithWalls(4, 4);
+    grid[1][1] = TILE.TARGET;
+
+    expect(isBoardSolved(grid, [{ x: 1, y: 1 }])).toBe(true);
+  });
+
+  it('is false for a boxless board, even with targets present', () => {
+    const grid = gridWithWalls(4, 4);
+    grid[1][1] = TILE.TARGET;
+
+    expect(isBoardSolved(grid, [])).toBe(false);
+  });
+
+  it('is false for a board with no targets at all', () => {
+    expect(isBoardSolved(gridWithWalls(4, 4), [])).toBe(false);
   });
 });
 
