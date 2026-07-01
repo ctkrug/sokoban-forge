@@ -247,6 +247,19 @@ describe('main.js DOM wiring', () => {
     expect(window.location.search).toContain('difficulty=hard');
   });
 
+  it('solves a board above the BFS cell threshold via aStarSolve', async () => {
+    // The hard preset is 9x9 = 81 cells, above BFS_CELL_THRESHOLD (49), so
+    // this is the only path in main.js that actually exercises aStarSolve -
+    // every other Solve test here uses the easy preset, which stays on BFS.
+    window.history.replaceState(null, '', '?difficulty=hard&seed=1');
+    await importMain();
+
+    document.getElementById('solve').click();
+
+    expect(document.getElementById('solve-step').disabled).toBe(false);
+    expect(document.getElementById('status').textContent).toMatch(/^Solution found: \d+ moves?\.$/);
+  });
+
   it('steps through a found solution one move at a time until solved', async () => {
     window.history.replaceState(null, '', '?difficulty=easy&seed=11');
     await importMain();
