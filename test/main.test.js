@@ -325,6 +325,28 @@ describe('main.js DOM wiring', () => {
     expect(window.location.search).toBe('?difficulty=easy&seed=11');
   });
 
+  it('stops an in-progress auto-play when Reset is clicked', async () => {
+    // Same underlying risk as New level/difficulty change: resetLevel()
+    // reassigns `history` back to the level's start, so a stale solution
+    // still being auto-played must be cleared rather than kept stepping.
+    vi.useFakeTimers();
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+    document.getElementById('solve-play').click();
+    expect(document.getElementById('solve-play').textContent).toBe('Pause');
+
+    document.getElementById('reset').click();
+
+    expect(document.getElementById('solve-play').textContent).toBe('Play');
+    const movesAfterReset = document.getElementById('move-counter').textContent;
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(document.getElementById('move-counter').textContent).toBe(movesAfterReset);
+
+    vi.useRealTimers();
+  });
+
   it('resets the level on the "r" key, same as clicking Reset', async () => {
     window.history.replaceState(null, '', '?difficulty=easy&seed=11');
     await importMain();
