@@ -39,7 +39,8 @@ codebase instead of living in separate toy projects.
 - **Undo** the last move (or **Redo** it back), **Reset** the level back to its start,
   or **New level** to generate another one at the selected difficulty.
 - **Solve** runs the solver from the current position; **Step** advances the found
-  solution one move, **Play** animates it automatically (speed adjustable).
+  solution one move, **Play** animates it automatically (speed adjustable, or press
+  **Escape** to stop early).
 - **Copy link** puts a URL encoding the current level's difficulty and seed on your
   clipboard — opening it regenerates the identical board.
 
