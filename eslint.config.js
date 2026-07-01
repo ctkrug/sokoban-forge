@@ -25,6 +25,7 @@ export default [
       globals: {
         process: 'readonly',
         HTMLCanvasElement: 'readonly',
+        performance: 'readonly',
       },
     },
   },
