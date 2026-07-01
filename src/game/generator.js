@@ -46,11 +46,11 @@ function shuffle(items, rng) {
  * walk (movement alone is its own inverse).
  */
 export function generateLevel({ width, height, boxCount, scrambleDepth, seed }) {
-  if (width < 4 || height < 4) {
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 4 || height < 4) {
     throw new RangeError('level must be at least 4x4 to leave room for a border');
   }
   const interiorCells = (width - 2) * (height - 2);
-  if (boxCount < 1 || boxCount + 1 > interiorCells) {
+  if (!Number.isInteger(boxCount) || boxCount < 1 || boxCount + 1 > interiorCells) {
     throw new RangeError('boxCount must fit the interior with room left for the player');
   }
 

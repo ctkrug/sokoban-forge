@@ -42,6 +42,22 @@ describe('generateLevel', () => {
     );
   });
 
+  it('rejects a non-finite width instead of failing deep inside array allocation', () => {
+    // Regression: `NaN < 4` is false, so the naive range check let a NaN
+    // width slip through to `Array(width)` and blow up with an opaque
+    // "Invalid array length" RangeError instead of this function's own
+    // clear message.
+    expect(() => generateLevel({ width: NaN, height: 8, boxCount: 2, scrambleDepth: 5, seed: 1 })).toThrow(
+      /at least 4x4/,
+    );
+  });
+
+  it('rejects a non-integer boxCount', () => {
+    expect(() =>
+      generateLevel({ width: 8, height: 8, boxCount: 1.5, scrambleDepth: 5, seed: 1 }),
+    ).toThrow(/must fit the interior/);
+  });
+
   it('rejects a boxCount that leaves no room for the player', () => {
     // 4x4 board has a 2x2 = 4-cell interior; 4 boxes leaves nowhere to stand.
     expect(() => generateLevel({ width: 4, height: 4, boxCount: 4, scrambleDepth: 5, seed: 1 })).toThrow(
