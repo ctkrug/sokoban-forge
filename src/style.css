@@ -1,0 +1,29 @@
+:root {
+  color-scheme: dark;
+  --bg: #1b1e24;
+  --fg: #e8e8e8;
+  --accent: #4caf7d;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, sans-serif;
+}
+
+h1 {
+  margin: 0;
+  color: var(--accent);
+}
+
+canvas {
+  border: 2px solid var(--accent);
+  image-rendering: pixelated;
+}
