@@ -38,6 +38,11 @@ export function isWon(state) {
   );
 }
 
+/** Number of boxes currently sitting on a target tile, for a progress readout. */
+export function countBoxesOnTarget(state) {
+  return state.boxes.filter((box) => state.grid[box.y][box.x] === TILE.TARGET).length;
+}
+
 /**
  * Builds a fresh game state from a grid and starting entity positions.
  * `player`/`boxes` are copied so the caller's objects can't be mutated
