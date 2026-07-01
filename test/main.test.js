@@ -734,6 +734,7 @@ describe('main.js DOM wiring', () => {
     solvePlay.click();
 
     expect(solvePlay.textContent).toBe('Play');
+    expect(solvePlay.getAttribute('aria-pressed')).toBe('false');
     const movesWhilePaused = document.getElementById('move-counter').textContent;
     await vi.advanceTimersByTimeAsync(1000);
     expect(document.getElementById('move-counter').textContent).toBe(movesWhilePaused);
@@ -754,6 +755,7 @@ describe('main.js DOM wiring', () => {
     window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
 
     expect(solvePlay.textContent).toBe('Play');
+    expect(solvePlay.getAttribute('aria-pressed')).toBe('false');
     const movesAfterEscape = document.getElementById('move-counter').textContent;
     await vi.advanceTimersByTimeAsync(1000);
     expect(document.getElementById('move-counter').textContent).toBe(movesAfterEscape);
