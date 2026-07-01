@@ -54,6 +54,24 @@ describe('bfsSolve', () => {
     expect(solved.boxes).toEqual([{ x: 4, y: 3 }]);
   });
 
+  it('does not report a board solved when a target has no box on it', () => {
+    // Regression: isSolved used to check only "every box is on a target",
+    // which is vacuously true when there are fewer boxes than targets.
+    const grid = createEmptyGrid(4, 4);
+    grid[1][1] = TILE.TARGET;
+    grid[2][2] = TILE.TARGET;
+    const boxes = [{ x: 1, y: 1 }]; // one box, two targets
+
+    expect(bfsSolve(grid, { x: 0, y: 0 }, boxes)).not.toEqual([]);
+  });
+
+  it('does not report a boxless board as solved', () => {
+    const grid = createEmptyGrid(4, 4);
+    grid[1][1] = TILE.TARGET;
+
+    expect(bfsSolve(grid, { x: 0, y: 0 }, [])).toBeNull();
+  });
+
   it('returns null for an unsolvable puzzle (box stuck in a corner)', () => {
     const grid = createEmptyGrid(4, 4);
     for (let x = 0; x < 4; x += 1) {

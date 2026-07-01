@@ -1,4 +1,3 @@
-import { TILE } from './grid.js';
 import { DIRECTIONS, findTargets, isWalkable } from './state.js';
 
 /** Canonical key for a (player, boxes) search node, order-independent on boxes. */
@@ -7,8 +6,18 @@ function serialize(player, boxes) {
   return `${player.x},${player.y}|${sorted.map((b) => `${b.x},${b.y}`).join(';')}`;
 }
 
+/**
+ * Mirrors state.js's isWon: every target must be covered by a box. Checking
+ * only "every box sits on a target" would be vacuously true whenever there
+ * are fewer boxes than targets (including zero boxes), wrongly reporting an
+ * unsolved board as already solved.
+ */
 function isSolved(grid, boxes) {
-  return boxes.every((box) => grid[box.y][box.x] === TILE.TARGET);
+  const targets = findTargets(grid);
+  return (
+    targets.length > 0 &&
+    targets.every((target) => boxes.some((box) => box.x === target.x && box.y === target.y))
+  );
 }
 
 /**
