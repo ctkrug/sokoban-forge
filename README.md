@@ -49,8 +49,8 @@ codebase instead of living in separate toy projects.
 
 - **Language:** JavaScript (ES modules), no framework.
 - **Rendering:** HTML5 Canvas 2D.
-- **Tooling:** [Vitest](https://vitest.dev/) for unit tests (generator + solver logic),
-  [ESLint](https://eslint.org/) for linting.
+- **Tooling:** [Vitest](https://vitest.dev/) for unit tests (100% statement/branch/
+  function/line coverage, enforced in CI), [ESLint](https://eslint.org/) for linting.
 - **Deployment:** static site, buildable to a single output directory, relative asset
   paths only — servable from any subpath.
 
@@ -64,10 +64,11 @@ for the build plan.
 
 ```sh
 npm install
-npm test        # run unit tests
-npm run lint     # lint source
-npm run dev      # local dev server
-npm run build    # production build to dist/
+npm test                # run unit tests
+npm run test:coverage   # run unit tests with a coverage report
+npm run lint            # lint source
+npm run dev             # local dev server
+npm run build           # production build to dist/
 ```
 
 ## License
