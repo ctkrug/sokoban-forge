@@ -437,6 +437,30 @@ describe('main.js DOM wiring', () => {
     expect(window.location.search).toContain('difficulty=hard');
   });
 
+  it('stops an in-progress auto-play when the difficulty is changed', async () => {
+    // Same risk as New level: a difficulty change also routes through
+    // newLevel(), reassigning `history` while a stale solution/interval
+    // from the old board could otherwise keep running against it.
+    vi.useFakeTimers();
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+    document.getElementById('solve-play').click();
+    expect(document.getElementById('solve-play').textContent).toBe('Pause');
+
+    const difficultySelect = document.getElementById('difficulty');
+    difficultySelect.value = 'hard';
+    difficultySelect.dispatchEvent(new window.Event('change'));
+
+    expect(document.getElementById('solve-play').textContent).toBe('Play');
+    const movesAfterChange = document.getElementById('move-counter').textContent;
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(document.getElementById('move-counter').textContent).toBe(movesAfterChange);
+
+    vi.useRealTimers();
+  });
+
   it('reproduces the exact same level after reloading a shared link', async () => {
     // The whole point of "Copy link" (README: "Level sharing") is that
     // reopening the URL regenerates the identical board. generateLevel's
