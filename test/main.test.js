@@ -384,6 +384,20 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
   });
 
+  it('undoes on an uppercase "Z" and redoes on an uppercase "Y" (Caps Lock/Shift held)', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    makeAnyLegalMove();
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+
+    window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Z' }));
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+
+    window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Y' }));
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+  });
+
   it('ignores the "z"/"y" keys while a form control has focus', async () => {
     window.history.replaceState(null, '', '?difficulty=easy&seed=11');
     await importMain();
