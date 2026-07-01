@@ -30,6 +30,13 @@ canvas {
      adjacent tile) is interpreted as a double-tap-to-zoom gesture on
      mobile browsers instead of two moves. */
   touch-action: manipulation;
+  /* The hard preset's canvas (360px) is wider than many phones in
+     portrait; scale it down to fit instead of forcing horizontal
+     scroll. The click handler already maps clientX/Y through
+     getBoundingClientRect(), so a CSS-scaled canvas still hit-tests
+     correctly. */
+  max-width: 100%;
+  height: auto;
 }
 
 #controls,
