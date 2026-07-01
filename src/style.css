@@ -27,3 +27,32 @@ canvas {
   border: 2px solid var(--accent);
   image-rendering: pixelated;
 }
+
+#controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+}
+
+#controls button,
+#controls select {
+  font: inherit;
+  color: inherit;
+  background: #2a2e37;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+}
+
+#controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+#status {
+  min-height: 1.5rem;
+  color: var(--accent);
+  font-weight: bold;
+}
