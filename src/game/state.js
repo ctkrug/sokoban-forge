@@ -29,13 +29,23 @@ export function findTargets(grid) {
   return targets;
 }
 
+/**
+ * A board is solved when every target tile has a box sitting on it (and
+ * there's at least one target - otherwise this would be vacuously true for
+ * a target-less board, or one with fewer boxes than targets). Shared by
+ * isWon and the solver's own goal check so the two can never define
+ * "solved" differently.
+ */
+export function isBoardSolved(grid, boxes) {
+  const targets = findTargets(grid);
+  return (
+    targets.length > 0 && targets.every((target) => boxIndexAt(boxes, target.x, target.y) !== -1)
+  );
+}
+
 /** A level is won when every target tile has a box sitting on it. */
 export function isWon(state) {
-  const targets = findTargets(state.grid);
-  return (
-    targets.length > 0 &&
-    targets.every((target) => boxIndexAt(state.boxes, target.x, target.y) !== -1)
-  );
+  return isBoardSolved(state.grid, state.boxes);
 }
 
 /** Number of boxes currently sitting on a target tile, for a progress readout. */

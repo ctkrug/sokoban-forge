@@ -1,23 +1,9 @@
-import { DIRECTIONS, findTargets, isWalkable } from './state.js';
+import { DIRECTIONS, findTargets, isBoardSolved, isWalkable } from './state.js';
 
 /** Canonical key for a (player, boxes) search node, order-independent on boxes. */
 function serialize(player, boxes) {
   const sorted = [...boxes].sort((a, b) => a.y - b.y || a.x - b.x);
   return `${player.x},${player.y}|${sorted.map((b) => `${b.x},${b.y}`).join(';')}`;
-}
-
-/**
- * Mirrors state.js's isWon: every target must be covered by a box. Checking
- * only "every box sits on a target" would be vacuously true whenever there
- * are fewer boxes than targets (including zero boxes), wrongly reporting an
- * unsolved board as already solved.
- */
-function isSolved(grid, boxes) {
-  const targets = findTargets(grid);
-  return (
-    targets.length > 0 &&
-    targets.every((target) => boxes.some((box) => box.x === target.x && box.y === target.y))
-  );
 }
 
 /**
@@ -55,7 +41,7 @@ function* neighbors(grid, node) {
  * to goal, or null if no solution was found within `maxStates`.
  */
 export function bfsSolve(grid, player, boxes, { maxStates = 200000 } = {}) {
-  if (isSolved(grid, boxes)) {
+  if (isBoardSolved(grid, boxes)) {
     return [];
   }
 
@@ -73,7 +59,7 @@ export function bfsSolve(grid, player, boxes, { maxStates = 200000 } = {}) {
       visited.add(key);
 
       const path = [...current.path, next.direction];
-      if (isSolved(grid, next.boxes)) {
+      if (isBoardSolved(grid, next.boxes)) {
         return path;
       }
       queue.push({ player: next.player, boxes: next.boxes, path });
@@ -164,7 +150,7 @@ class MinHeap {
  * steers the frontier toward the goal instead of expanding uniformly.
  */
 export function aStarSolve(grid, player, boxes, { maxStates = 200000 } = {}) {
-  if (isSolved(grid, boxes)) {
+  if (isBoardSolved(grid, boxes)) {
     return [];
   }
 
@@ -197,7 +183,7 @@ export function aStarSolve(grid, player, boxes, { maxStates = 200000 } = {}) {
       gScore.set(key, g);
 
       const path = [...current.path, next.direction];
-      if (isSolved(grid, next.boxes)) {
+      if (isBoardSolved(grid, next.boxes)) {
         return path;
       }
       const f = g + boxToTargetHeuristic(next.boxes, targets);
