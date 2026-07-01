@@ -153,6 +153,17 @@ solvePlayButton.addEventListener('click', () => {
   playTimer = setInterval(stepSolution, playbackIntervalMs());
 });
 
+// Without this, dragging the slider mid-playback has no visible effect until
+// Pause/Play is toggled - the running interval keeps firing at whatever rate
+// it was created with, even though the label reads "Speed" (implying live
+// control) rather than "Speed for the next play".
+solveSpeedInput.addEventListener('input', () => {
+  if (playTimer) {
+    clearInterval(playTimer);
+    playTimer = setInterval(stepSolution, playbackIntervalMs());
+  }
+});
+
 const FORM_CONTROL_TAGS = new Set(['INPUT', 'SELECT', 'TEXTAREA']);
 
 window.addEventListener('keydown', (event) => {
