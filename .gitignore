@@ -1,9 +1,9 @@
 # Dependencies
 node_modules/
 
-# Build output
+# Build output. site/ is the committed static bundle that gets deployed, so
+# it is intentionally tracked; dist/ is only a scratch dir for local builds.
 dist/
-site/
 
 # Logs
 npm-debug.log*
