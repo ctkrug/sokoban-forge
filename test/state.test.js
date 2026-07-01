@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { TILE, createEmptyGrid } from '../src/game/grid.js';
-import { createGameState, move } from '../src/game/state.js';
+import { countBoxesOnTarget, createGameState, move } from '../src/game/state.js';
 
 function gridWithWalls(width, height, walls = []) {
   const grid = createEmptyGrid(width, height);
@@ -114,5 +114,29 @@ describe('move', () => {
     });
 
     expect(() => move(state, 'diagonal')).toThrow(RangeError);
+  });
+});
+
+describe('countBoxesOnTarget', () => {
+  it('counts only the boxes actually sitting on a target tile', () => {
+    const grid = gridWithWalls(5, 5);
+    grid[1][1] = TILE.TARGET;
+    grid[2][2] = TILE.TARGET;
+    const state = createGameState({
+      grid,
+      player: { x: 0, y: 0 },
+      boxes: [
+        { x: 1, y: 1 }, // on target
+        { x: 3, y: 3 }, // off target
+      ],
+    });
+
+    expect(countBoxesOnTarget(state)).toBe(1);
+  });
+
+  it('is 0 for a board with no boxes', () => {
+    const state = createGameState({ grid: gridWithWalls(4, 4), player: { x: 0, y: 0 }, boxes: [] });
+
+    expect(countBoxesOnTarget(state)).toBe(0);
   });
 });
