@@ -48,6 +48,19 @@ describe('generateLevel', () => {
   });
 
   it.each(Object.entries(DIFFICULTY_PRESETS))(
+    'never produces an already-solved %s level either',
+    (_name, preset) => {
+      // Multiple boxes make an all-on-target spawn far less likely than the
+      // easy preset, but the same stillSolved() guard covers them too - lock
+      // that in so a future change to the guard can't silently regress it.
+      for (let seed = 1; seed <= 200; seed += 1) {
+        const level = generateLevel({ ...preset, seed });
+        expect(isWon(createGameState(level))).toBe(false);
+      }
+    },
+  );
+
+  it.each(Object.entries(DIFFICULTY_PRESETS))(
     'always generates a solvable level for the %s preset',
     (_name, preset) => {
       for (const seed of [1, 2, 3, 4, 5]) {
