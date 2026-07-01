@@ -57,8 +57,9 @@ codebase instead of living in separate toy projects.
 ## Status
 
 Core gameplay, generation, and solving are functionally complete. See
-[`docs/VISION.md`](docs/VISION.md) for the design and [`docs/BACKLOG.md`](docs/BACKLOG.md)
-for the build plan.
+[`docs/VISION.md`](docs/VISION.md) for the design, [`docs/BACKLOG.md`](docs/BACKLOG.md)
+for the build plan, and [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for a map of the
+codebase itself.
 
 ## Development
 
