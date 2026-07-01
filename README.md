@@ -24,7 +24,7 @@ codebase instead of living in separate toy projects.
 - **Difficulty tuning** — easy/medium/hard presets scale grid size, box count, and
   reverse-play depth.
 - **Playable Canvas UI** — keyboard (arrows/WASD) and click/tap controls, move counter,
-  undo, reset, and a difficulty selector.
+  undo/redo, reset, and a difficulty selector.
 - **On-demand solver visualization** — BFS for small boards, A* with a box-to-target
   Manhattan heuristic for larger ones; step or auto-play the solution move by move.
 - **Level sharing** — a level's difficulty and seed live in the URL, so "Copy link"
@@ -36,8 +36,8 @@ codebase instead of living in separate toy projects.
 
 - **Move:** arrow keys or WASD, or click/tap a tile directly next to the player.
 - **Push a box** by walking into it — it slides one tile further, if that tile is clear.
-- **Undo** the last move, **Reset** the level back to its start, or **New level** to
-  generate another one at the selected difficulty.
+- **Undo** the last move (or **Redo** it back), **Reset** the level back to its start,
+  or **New level** to generate another one at the selected difficulty.
 - **Solve** runs the solver from the current position; **Step** advances the found
   solution one move, **Play** animates it automatically (speed adjustable).
 - **Copy link** puts a URL encoding the current level's difficulty and seed on your
