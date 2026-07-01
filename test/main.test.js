@@ -455,6 +455,53 @@ describe('main.js DOM wiring', () => {
     vi.useRealTimers();
   });
 
+  it('updates a running interval live when the speed slider changes mid-playback', async () => {
+    // Regression: the running setInterval was created once with whatever
+    // rate the slider read at Play-click time and never re-read it, so
+    // dragging the slider mid-playback silently did nothing until the user
+    // toggled Pause/Play to pick up the new value.
+    vi.useFakeTimers();
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    const speedInput = document.getElementById('solve-speed');
+    document.getElementById('solve').click();
+    speedInput.value = speedInput.min; // slowest: inverts to a 600ms interval
+    document.getElementById('solve-play').click();
+
+    await vi.advanceTimersByTimeAsync(100);
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+
+    speedInput.value = speedInput.max; // fastest: inverts to a 60ms interval
+    speedInput.dispatchEvent(new window.Event('input'));
+
+    await vi.advanceTimersByTimeAsync(100);
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+
+    vi.useRealTimers();
+  });
+
+  it('leaves nothing running for the speed slider to restart once playback is not active', async () => {
+    // The live-update listener above only makes sense while playTimer is
+    // set; dragging the slider before Play (or after it naturally finishes)
+    // must be a no-op rather than starting playback as a side effect.
+    vi.useFakeTimers();
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    const speedInput = document.getElementById('solve-speed');
+    document.getElementById('solve').click();
+    speedInput.value = speedInput.max;
+    speedInput.dispatchEvent(new window.Event('input'));
+
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+    expect(document.getElementById('solve-play').textContent).toBe('Play');
+
+    vi.useRealTimers();
+  });
+
   it('pauses an in-progress auto-play when clicked again', async () => {
     vi.useFakeTimers();
     window.history.replaceState(null, '', '?difficulty=easy&seed=11');
