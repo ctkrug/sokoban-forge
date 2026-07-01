@@ -400,6 +400,30 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('undo').disabled).toBe(true);
   });
 
+  it('stops an in-progress auto-play when New level is clicked', async () => {
+    // Regression risk: newLevel() reassigns `history` to a fresh
+    // MoveHistory for the new board, but the old `solution` array (a list
+    // of directions computed against the *previous* board) would otherwise
+    // keep being stepped through by the running interval and applied to
+    // the wrong level entirely.
+    vi.useFakeTimers();
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+    document.getElementById('solve-play').click();
+    expect(document.getElementById('solve-play').textContent).toBe('Pause');
+
+    document.getElementById('new-level').click();
+
+    expect(document.getElementById('solve-play').textContent).toBe('Play');
+    const movesAfterNewLevel = document.getElementById('move-counter').textContent;
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(document.getElementById('move-counter').textContent).toBe(movesAfterNewLevel);
+
+    vi.useRealTimers();
+  });
+
   it('regenerates the level at the new size when the difficulty changes', async () => {
     window.history.replaceState(null, '', '?difficulty=easy&seed=11');
     await importMain();
