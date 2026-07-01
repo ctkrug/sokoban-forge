@@ -71,8 +71,36 @@ export function generateLevel({ width, height, boxCount, scrambleDepth, seed }) 
       cells.push({ x, y });
     }
   }
-  const shuffled = shuffle(cells, rng);
 
+  // A random walk can easily wander for the whole scramble without ever
+  // standing next to a box, especially with few boxes on a small board - or
+  // hit a genuine dead end (no legal pull at all) on its very first step -
+  // leaving every box exactly on its target, i.e. a level that's already
+  // "solved" on load. Re-roll the target/player placement and try again a
+  // bounded number of times; only a board with no room for the player to
+  // move at all (e.g. boxes filling the entire interior) can exhaust every
+  // attempt, in which case the last attempt is returned as-is rather than
+  // looping forever.
+  const maxAttempts = 50;
+  let attempt;
+  for (let i = 0; i < maxAttempts; i += 1) {
+    attempt = attemptScramble(grid, cells, boxCount, scrambleDepth, rng);
+    if (!attempt.solved) {
+      break;
+    }
+  }
+
+  return { grid, player: attempt.player, boxes: attempt.boxes };
+}
+
+function attemptScramble(grid, cells, boxCount, scrambleDepth, rng) {
+  for (const cell of cells) {
+    if (grid[cell.y][cell.x] === TILE.TARGET) {
+      grid[cell.y][cell.x] = TILE.FLOOR;
+    }
+  }
+
+  const shuffled = shuffle(cells, rng);
   const targets = shuffled.slice(0, boxCount);
   for (const target of targets) {
     grid[target.y][target.x] = TILE.TARGET;
@@ -80,12 +108,6 @@ export function generateLevel({ width, height, boxCount, scrambleDepth, seed }) 
   let boxes = targets.map((target) => ({ ...target }));
   let player = { ...shuffled[boxCount] };
 
-  // A random walk can easily wander for the whole scramble without ever
-  // standing next to a box, especially with few boxes on a small board -
-  // leaving every box exactly on its target, i.e. a level that's already
-  // "solved" on load. Keep scrambling past scrambleDepth until at least one
-  // box has actually left its target, bounded so a genuine dead end (no
-  // legal pull at all) still terminates instead of looping forever.
   const stillSolved = () => targets.every((target) => boxIndexAt(boxes, target.x, target.y) !== -1);
   const maxSteps = Math.max(scrambleDepth * 50, 1000);
 
@@ -115,5 +137,5 @@ export function generateLevel({ width, height, boxCount, scrambleDepth, seed }) 
     player = choice.player;
   }
 
-  return { grid, player, boxes };
+  return { player, boxes, solved: stillSolved() };
 }
