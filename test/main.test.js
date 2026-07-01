@@ -620,6 +620,27 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('status').textContent).toBe('Solved! 🎉');
   });
 
+  it('is a no-op to force another step after the solution is already exhausted', async () => {
+    // stepSolution()'s guard is `!solution || solutionIndex >= solution.length`
+    // - the "no solution" test above only exercises the first half (solution
+    // is null); this is the other half, reachable only once a real solution
+    // has already been fully stepped through and the button force-re-enabled.
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    document.getElementById('solve').click();
+    const solveStep = document.getElementById('solve-step');
+    while (!solveStep.disabled) {
+      solveStep.click();
+    }
+    const movesAtWin = document.getElementById('move-counter').textContent;
+    solveStep.disabled = false;
+
+    expect(() => solveStep.click()).not.toThrow();
+    expect(document.getElementById('move-counter').textContent).toBe(movesAtWin);
+    expect(document.getElementById('status').textContent).toBe('Solved! 🎉');
+  });
+
   it('ignores further keyboard moves once the board is won', async () => {
     // tryMove's `isWon(history.state)` guard is otherwise never exercised -
     // every other movement test plays on an unsolved board. Without it, a
