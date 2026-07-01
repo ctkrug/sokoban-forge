@@ -13,6 +13,7 @@ function setUpDom() {
     <button id="new-level" type="button">New level</button>
     <button id="reset" type="button">Reset</button>
     <button id="undo" type="button">Undo</button>
+    <button id="redo" type="button">Redo</button>
     <button id="share" type="button">Copy link</button>
     <span id="move-counter">Moves: 0</span>
     <canvas id="game-canvas" width="280" height="280"></canvas>
@@ -88,6 +89,39 @@ describe('main.js DOM wiring', () => {
     // intact, so Step/Play kept referencing a board that no longer existed.
     expect(solveStep.disabled).toBe(true);
     expect(solvePlay.disabled).toBe(true);
+  });
+
+  it('redoes an undone move and re-disables once the redo stack is empty', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    makeAnyLegalMove();
+    const redo = document.getElementById('redo');
+    expect(redo.disabled).toBe(true);
+
+    document.getElementById('undo').click();
+    expect(redo.disabled).toBe(false);
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+
+    redo.click();
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+    expect(redo.disabled).toBe(true);
+  });
+
+  it('clears a pending solution when the player redoes a move', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    makeAnyLegalMove();
+    document.getElementById('undo').click();
+
+    document.getElementById('solve').click();
+    const solveStep = document.getElementById('solve-step');
+    expect(solveStep.disabled).toBe(false);
+
+    document.getElementById('redo').click();
+
+    expect(solveStep.disabled).toBe(true);
   });
 
   it('falls back to showing the link when the Clipboard API is unavailable', async () => {
