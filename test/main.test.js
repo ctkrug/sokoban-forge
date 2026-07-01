@@ -348,6 +348,32 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
   });
 
+  it('undoes on the "z" key and redoes on the "y" key, same as their buttons', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    makeAnyLegalMove();
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+
+    window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'z' }));
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+
+    window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'y' }));
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+  });
+
+  it('ignores the "z"/"y" keys while a form control has focus', async () => {
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    makeAnyLegalMove();
+    const difficultySelect = document.getElementById('difficulty');
+    difficultySelect.focus();
+    difficultySelect.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'z', bubbles: true }));
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+  });
+
   it('ignores the "r" key while a form control has focus', async () => {
     // Otherwise typing "r" to jump the native <select>'s type-ahead to a
     // difficulty option would also blow away the player's progress.
