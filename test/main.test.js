@@ -16,6 +16,7 @@ function setUpDom() {
     <button id="redo" type="button">Redo</button>
     <button id="share" type="button">Copy link</button>
     <span id="move-counter">Moves: 0</span>
+    <span id="target-counter">Boxes on target: 0/0</span>
     <canvas id="game-canvas" width="280" height="280"></canvas>
     <button id="solve" type="button">Solve</button>
     <button id="solve-step" type="button" disabled>Step</button>
@@ -378,6 +379,24 @@ describe('main.js DOM wiring', () => {
     }
 
     expect(document.getElementById('status').textContent).toBe('Solved! 🎉');
+  });
+
+  it('updates the boxes-on-target counter as the solver steps toward the win', async () => {
+    // The easy preset always has exactly one box, so solving it fully must
+    // walk the counter from 0/1 to 1/1.
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    const targetCounter = document.getElementById('target-counter');
+    expect(targetCounter.textContent).toBe('Boxes on target: 0/1');
+
+    document.getElementById('solve').click();
+    const solveStep = document.getElementById('solve-step');
+    while (!solveStep.disabled) {
+      solveStep.click();
+    }
+
+    expect(targetCounter.textContent).toBe('Boxes on target: 1/1');
   });
 
   it('auto-plays a found solution through to completion', async () => {
