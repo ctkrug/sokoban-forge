@@ -25,11 +25,13 @@ const solvePlayButton = document.getElementById('solve-play');
 const solveSpeedInput = document.getElementById('solve-speed');
 const shareButton = document.getElementById('share');
 
+// Keys are lowercase because the lookup below lowercases event.key first
+// (see the keydown listener for why).
 const KEY_TO_DIRECTION = {
-  ArrowUp: 'up',
-  ArrowDown: 'down',
-  ArrowLeft: 'left',
-  ArrowRight: 'right',
+  arrowup: 'up',
+  arrowdown: 'down',
+  arrowleft: 'left',
+  arrowright: 'right',
   w: 'up',
   s: 'down',
   a: 'left',
@@ -144,7 +146,10 @@ window.addEventListener('keydown', (event) => {
   if (FORM_CONTROL_TAGS.has(event.target.tagName)) {
     return;
   }
-  const direction = KEY_TO_DIRECTION[event.key];
+  // Lowercased so Caps Lock or a Shift-held keypress (which reports "W",
+  // not "w") still maps to the WASD entries below; the Arrow* keys are
+  // unaffected since they have no case to begin with.
+  const direction = KEY_TO_DIRECTION[event.key.toLowerCase()];
   if (!direction) {
     return;
   }

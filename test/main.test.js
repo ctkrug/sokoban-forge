@@ -170,6 +170,18 @@ describe('main.js DOM wiring', () => {
     expect(event.defaultPrevented).toBe(true);
   });
 
+  it('moves the player on an uppercase WASD key (Caps Lock/Shift held)', async () => {
+    // Regression: KEY_TO_DIRECTION only had lowercase w/a/s/d entries, so a
+    // keydown reporting "W" (Caps Lock on, or Shift held) silently did
+    // nothing even though the intent was clearly to move up.
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
+    await importMain();
+
+    window.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'W' }));
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 1');
+  });
+
   it('moves the player on a tap/click of an adjacent tile', async () => {
     // Fixed seed known to start the player at (5, 5) on the easy preset, so
     // a click on tile (5, 4) is a deterministic "tap above the player".
