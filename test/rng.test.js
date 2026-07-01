@@ -67,4 +67,13 @@ describe('createRng', () => {
 
     expect(seqA).toEqual(seqB);
   });
+
+  it('treats a numeric seed and its string form as different seeds', () => {
+    // The numeric branch feeds mulberry32 directly; the string branch hashes
+    // it through xmur3 first, so 42 and "42" take genuinely different code
+    // paths - this is exactly why share.js's parseSeed exists (a URL always
+    // round-trips the seed as a string, so it must be converted back to a
+    // number to reproduce the original level rather than a different one).
+    expect(createRng(42)()).not.toBe(createRng('42')());
+  });
 });
