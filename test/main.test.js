@@ -912,16 +912,21 @@ describe('main.js DOM wiring', () => {
   });
 
   it('reports a successful clipboard write', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(window.navigator, 'clipboard', {
-      value: { writeText: vi.fn().mockResolvedValue(undefined) },
+      value: { writeText },
       configurable: true,
     });
+    window.history.replaceState(null, '', '?difficulty=easy&seed=11');
 
     await importMain();
     document.getElementById('share').click();
     await Promise.resolve().then(() => {});
     await Promise.resolve().then(() => {});
 
+    // Not just that *a* write succeeded - that the actual current page URL
+    // was what got copied, not a stale or empty string.
+    expect(writeText).toHaveBeenCalledWith(window.location.href);
     expect(document.getElementById('status').textContent).toBe('Link copied!');
   });
 });
