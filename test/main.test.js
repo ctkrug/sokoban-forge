@@ -169,6 +169,24 @@ describe('main.js DOM wiring', () => {
     expect(document.getElementById('target-counter').textContent).toMatch(/^Boxes on target: [0-2]\/3$/);
   });
 
+  it('loads a shared level whose seed is literally 0', async () => {
+    // newLevel(seed = Date.now()) only falls back to Date.now() when called
+    // with no argument at all - JS default parameters trigger on `undefined`,
+    // not on falsy values. seed=0 is exactly the case that would break if
+    // that call were ever changed to something like `newLevel(seed || ...)`,
+    // so lock in that a literal 0 seed is honored rather than replaced.
+    window.history.replaceState(null, '', '?difficulty=easy&seed=0');
+    await importMain();
+
+    expect(window.location.search).toBe('?difficulty=easy&seed=0');
+
+    setUpDom();
+    window.history.replaceState(null, '', '?difficulty=easy&seed=0');
+    await importMain();
+
+    expect(window.location.search).toBe('?difficulty=easy&seed=0');
+  });
+
   it('falls back to showing the link when the Clipboard API is unavailable', async () => {
     Object.defineProperty(window.navigator, 'clipboard', { value: undefined, configurable: true });
 
