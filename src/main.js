@@ -124,6 +124,10 @@ solveButton.addEventListener('click', () => {
   solution = path;
   solutionIndex = 0;
   render();
+  // After render(), which already set statusLine from isWon() - a fresh
+  // solve is never itself a win, so this can't be clobbered by it.
+  statusLine.textContent =
+    path.length === 0 ? 'Already solved!' : `Solution found: ${path.length} move${path.length === 1 ? '' : 's'}.`;
 });
 
 solveStepButton.addEventListener('click', stepSolution);
