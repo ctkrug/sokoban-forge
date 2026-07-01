@@ -123,8 +123,8 @@ solveButton.addEventListener('click', () => {
 
   const { grid, player, boxes } = history.state;
   const cellCount = grid.length * grid[0].length;
-  const solve = cellCount <= BFS_CELL_THRESHOLD ? bfsSolve : aStarSolve;
-  const path = solve(grid, player, boxes);
+  const usingBfs = cellCount <= BFS_CELL_THRESHOLD;
+  const path = (usingBfs ? bfsSolve : aStarSolve)(grid, player, boxes);
 
   if (!path) {
     statusLine.textContent = 'No solution found from the current position.';
@@ -134,9 +134,14 @@ solveButton.addEventListener('click', () => {
   solutionIndex = 0;
   render();
   // After render(), which already set statusLine from isWon() - a fresh
-  // solve is never itself a win, so this can't be clobbered by it.
+  // solve is never itself a win, so this can't be clobbered by it. Naming
+  // the algorithm makes the BFS/A* switch (the game's actual selling
+  // point) visible in the UI, not just in the README.
+  const algorithm = usingBfs ? 'BFS' : 'A*';
   statusLine.textContent =
-    path.length === 0 ? 'Already solved!' : `Solution found: ${path.length} move${path.length === 1 ? '' : 's'}.`;
+    path.length === 0
+      ? 'Already solved!'
+      : `Solution found via ${algorithm}: ${path.length} move${path.length === 1 ? '' : 's'}.`;
 });
 
 solveStepButton.addEventListener('click', stepSolution);

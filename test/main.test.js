@@ -197,7 +197,7 @@ describe('main.js DOM wiring', () => {
     await importMain();
     document.getElementById('solve').click();
     const firstSolveStatus = document.getElementById('status').textContent;
-    expect(firstSolveStatus).toMatch(/^Solution found: \d+ moves?\.$/);
+    expect(firstSolveStatus).toMatch(/^Solution found via BFS: \d+ moves?\.$/);
 
     setUpDom();
     window.history.replaceState(null, '', '?difficulty=easy&seed=3.5');
@@ -509,7 +509,7 @@ describe('main.js DOM wiring', () => {
     document.getElementById('solve').click();
     const firstSolveStatus = document.getElementById('status').textContent;
     const firstTargetCounter = document.getElementById('target-counter').textContent;
-    expect(firstSolveStatus).toMatch(/^Solution found: \d+ moves?\.$/);
+    expect(firstSolveStatus).toMatch(/^Solution found via A\*: \d+ moves?\.$/);
 
     // Simulate reopening the copied link in a fresh tab/session.
     setUpDom();
@@ -531,7 +531,7 @@ describe('main.js DOM wiring', () => {
     document.getElementById('solve').click();
 
     expect(document.getElementById('solve-step').disabled).toBe(false);
-    expect(document.getElementById('status').textContent).toMatch(/^Solution found: \d+ moves?\.$/);
+    expect(document.getElementById('status').textContent).toMatch(/^Solution found via A\*: \d+ moves?\.$/);
   });
 
   it('is a no-op to step when there is no solution, even if invoked directly', async () => {
@@ -775,7 +775,7 @@ describe('main.js DOM wiring', () => {
 
     document.getElementById('solve').click();
 
-    expect(document.getElementById('status').textContent).toMatch(/^Solution found: \d+ moves?\.$/);
+    expect(document.getElementById('status').textContent).toMatch(/^Solution found via BFS: \d+ moves?\.$/);
   });
 
   it('uses singular "move" for a one-move solution', async () => {
@@ -786,7 +786,7 @@ describe('main.js DOM wiring', () => {
 
     document.getElementById('solve').click();
 
-    expect(document.getElementById('status').textContent).toBe('Solution found: 1 move.');
+    expect(document.getElementById('status').textContent).toBe('Solution found via BFS: 1 move.');
   });
 
   it('reports "Already solved!" when solving a board that is already won', async () => {
