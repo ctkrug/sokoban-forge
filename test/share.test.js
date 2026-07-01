@@ -54,4 +54,12 @@ describe('parseSeed', () => {
     // non-empty-length string of spaces is truthy.
     expect(parseSeed('   ')).toBe(0);
   });
+
+  it('takes the numeric branch for a literal "Infinity", not the string-hash one', () => {
+    // Number('Infinity') is Infinity, not NaN, so a crafted ?seed=Infinity
+    // reaches mulberry32 as a number rather than being xmur3-hashed as a
+    // string - still deterministic there (mulberry32's `>>> 0` truncates
+    // Infinity to 0), just pin the branch this takes down explicitly.
+    expect(parseSeed('Infinity')).toBe(Infinity);
+  });
 });
