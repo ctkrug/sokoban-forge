@@ -222,7 +222,7 @@ canvas.addEventListener('click', (event) => {
 difficultySelect.addEventListener('change', () => newLevel());
 newLevelButton.addEventListener('click', () => newLevel());
 resetButton.addEventListener('click', () => resetLevel());
-undoButton.addEventListener('click', () => {
+function undoMove() {
   if (history.undo()) {
     // Without this, a stale solution/autoplay from before the undo would
     // keep stepping through moves computed for a board state that no
@@ -230,15 +230,19 @@ undoButton.addEventListener('click', () => {
     clearSolution();
     render();
   }
-});
-redoButton.addEventListener('click', () => {
+}
+
+function redoMove() {
   if (history.redo()) {
     // Same reasoning as undo: redo also lands on a board a stale solution
     // wasn't computed for.
     clearSolution();
     render();
   }
-});
+}
+
+undoButton.addEventListener('click', undoMove);
+redoButton.addEventListener('click', redoMove);
 
 shareButton.addEventListener('click', () => {
   if (!navigator.clipboard) {
