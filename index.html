@@ -23,7 +23,13 @@
         <button id="share" type="button">Copy link</button>
         <span id="move-counter">Moves: 0</span>
       </div>
-      <canvas id="game-canvas" width="400" height="320"></canvas>
+      <canvas
+        id="game-canvas"
+        width="400"
+        height="320"
+        role="img"
+        aria-label="Sokoban board: use arrow keys, WASD, or tap an adjacent tile to move"
+      ></canvas>
       <div id="solver-controls">
         <button id="solve" type="button">Solve</button>
         <button id="solve-step" type="button" disabled>Step</button>
