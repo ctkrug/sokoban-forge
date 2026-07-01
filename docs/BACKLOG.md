@@ -15,17 +15,17 @@ The grid model, movement rules, and win condition the generator and solver both 
 
 Reverse-play generation so every level that reaches the player is solvable by construction.
 
-- [ ] Implement the reverse-play generator core (start solved, apply legal reverse moves)
-- [ ] Add difficulty parameters: grid size, box count, and scramble depth
-- [ ] Add seeded generation so a given seed always reproduces the same level
-- [ ] Add automated tests that assert generator output is always solvable
+- [x] Implement the reverse-play generator core (start solved, apply legal reverse moves)
+- [x] Add difficulty parameters: grid size, box count, and scramble depth
+- [x] Add seeded generation so a given seed always reproduces the same level
+- [x] Add automated tests that assert generator output is always solvable
 
 ## Epic 3 — Solver and visualization
 
 The search algorithms and the animation that makes the solve visible to the player.
 
-- [ ] Implement a BFS solver for small boards
-- [ ] Implement an A* solver with a box-to-target distance heuristic for larger boards
+- [x] Implement a BFS solver for small boards
+- [x] Implement an A* solver with a box-to-target distance heuristic for larger boards
 - [ ] Animate the found solution path move-by-move on the canvas
 - [ ] Add solver playback controls (play/pause/step, speed)
 
