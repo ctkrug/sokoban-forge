@@ -98,4 +98,29 @@ describe('main.js DOM wiring', () => {
     expect(() => document.getElementById('share').click()).not.toThrow();
     expect(document.getElementById('status').textContent).toBe(window.location.href);
   });
+
+  it('ignores arrow keys while a form control has focus', async () => {
+    // Regression: the game's window-level keydown listener used to fire
+    // regardless of focus, so arrow keys aimed at the speed slider (or the
+    // difficulty dropdown) also moved the player underneath it.
+    await importMain();
+
+    // Dispatched on the focused element (not window) so it bubbles with
+    // target set to that element, matching how a real keypress reaches the
+    // window-level listener.
+    const speedInput = document.getElementById('solve-speed');
+    speedInput.focus();
+    speedInput.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+  });
+
+  it('preventDefaults arrow keys so they do not scroll the page', async () => {
+    await importMain();
+
+    const event = new window.KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true });
+    window.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+  });
 });

@@ -133,7 +133,23 @@ solvePlayButton.addEventListener('click', () => {
   playTimer = setInterval(stepSolution, Number(solveSpeedInput.value));
 });
 
-window.addEventListener('keydown', (event) => tryMove(KEY_TO_DIRECTION[event.key]));
+const FORM_CONTROL_TAGS = new Set(['INPUT', 'SELECT', 'TEXTAREA']);
+
+window.addEventListener('keydown', (event) => {
+  // Skip while a form control has focus: the difficulty <select> and the
+  // speed <input type="range"> both use arrow keys natively, and hijacking
+  // them here would move the player instead of adjusting the control.
+  if (FORM_CONTROL_TAGS.has(event.target.tagName)) {
+    return;
+  }
+  const direction = KEY_TO_DIRECTION[event.key];
+  if (!direction) {
+    return;
+  }
+  // Otherwise ArrowUp/Down/Left/Right scroll the page underneath the canvas.
+  event.preventDefault();
+  tryMove(direction);
+});
 
 /**
  * Click/tap support: a tap on one of the four tiles orthogonally adjacent
