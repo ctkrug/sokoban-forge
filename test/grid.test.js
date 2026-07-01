@@ -25,6 +25,20 @@ describe('createEmptyGrid', () => {
   it('rejects a non-integer width', () => {
     expect(() => createEmptyGrid(4.5, 4)).toThrow(/positive integers/);
   });
+
+  it('gives each row its own array, not shared references to one row', () => {
+    // Classic footgun: `Array(height).fill(Array(width).fill(FLOOR))` would
+    // fill every row with references to the *same* inner array, so writing
+    // to one row's cell would silently corrupt every other row. Pin down
+    // that mutating one row leaves the rest of the grid untouched.
+    const grid = createEmptyGrid(3, 3);
+
+    grid[0][0] = TILE.WALL;
+
+    expect(grid[1][0]).toBe(TILE.FLOOR);
+    expect(grid[2][0]).toBe(TILE.FLOOR);
+    expect(grid[0]).not.toBe(grid[1]);
+  });
 });
 
 describe('inBounds', () => {
