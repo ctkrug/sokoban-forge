@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { TILE } from '../src/game/grid.js';
 import { DIFFICULTY_PRESETS, generateLevel } from '../src/game/generator.js';
 import { aStarSolve, bfsSolve } from '../src/game/solver.js';
 import { createGameState, isWon, move } from '../src/game/state.js';
@@ -34,6 +35,23 @@ describe('generateLevel', () => {
     const b = generateLevel({ ...base, seed: 'seed-b' });
 
     expect(a).not.toEqual(b);
+  });
+
+  it('always walls off the full border, leaving only the interior playable', () => {
+    // No test here directly inspects the grid's tile layout - every other
+    // test only checks solvability/reachability, which would still pass if
+    // e.g. an off-by-one left a gap in the border wall (the solver would
+    // just route through it). Pin the border down explicitly.
+    const { grid } = generateLevel({ width: 6, height: 5, boxCount: 2, scrambleDepth: 10, seed: 1 });
+
+    for (let x = 0; x < 6; x += 1) {
+      expect(grid[0][x]).toBe(TILE.WALL);
+      expect(grid[4][x]).toBe(TILE.WALL);
+    }
+    for (let y = 0; y < 5; y += 1) {
+      expect(grid[y][0]).toBe(TILE.WALL);
+      expect(grid[y][5]).toBe(TILE.WALL);
+    }
   });
 
   it('rejects boards too small to fit a border and one interior cell', () => {
