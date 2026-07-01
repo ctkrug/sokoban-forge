@@ -90,6 +90,17 @@ describe('generateLevel', () => {
     ).not.toThrow();
   });
 
+  it('still avoids spawning an already-solved level even with scrambleDepth 0', () => {
+    // With scrambleDepth 0, `step < scrambleDepth` is never true, so every
+    // scramble step attemptScramble takes only happens because
+    // `stillSolved()` forced the loop to keep going past its nominal depth -
+    // this is the most aggressive exercise of that fallback, so it's worth
+    // pinning down on its own rather than trusting the non-throw check above.
+    const level = generateLevel({ width: 8, height: 8, boxCount: 2, scrambleDepth: 0, seed: 1 });
+
+    expect(isWon(createGameState(level))).toBe(false);
+  });
+
   it('rejects a boxCount that leaves no room for the player', () => {
     // 4x4 board has a 2x2 = 4-cell interior; 4 boxes leaves nowhere to stand.
     expect(() => generateLevel({ width: 4, height: 4, boxCount: 4, scrambleDepth: 5, seed: 1 })).toThrow(
