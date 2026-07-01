@@ -12,8 +12,12 @@ export const TILE = {
  * @returns {string[][]} grid[y][x]
  */
 export function createEmptyGrid(width, height) {
-  if (width <= 0 || height <= 0) {
-    throw new RangeError('grid dimensions must be positive');
+  // `NaN <= 0` is false, so a bare positivity check lets a non-finite
+  // dimension slip past validation. Array.from then silently coerces
+  // `{ length: NaN }` to length 0 instead of throwing, so a NaN height
+  // would return a mysteriously empty grid rather than fail loudly here.
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0) {
+    throw new RangeError('grid dimensions must be positive integers');
   }
   return Array.from({ length: height }, () => Array(width).fill(TILE.FLOOR));
 }

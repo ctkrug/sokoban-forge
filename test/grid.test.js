@@ -13,6 +13,18 @@ describe('createEmptyGrid', () => {
     expect(() => createEmptyGrid(0, 3)).toThrow(RangeError);
     expect(() => createEmptyGrid(3, -1)).toThrow(RangeError);
   });
+
+  it('rejects a non-finite height instead of silently returning a 0-row grid', () => {
+    // Regression: `NaN <= 0` is false, so the old positivity-only check let
+    // NaN through to Array.from({ length: NaN }, ...), which coerces to
+    // length 0 rather than throwing - a caller would get an empty grid back
+    // with no indication anything went wrong.
+    expect(() => createEmptyGrid(4, NaN)).toThrow(/positive integers/);
+  });
+
+  it('rejects a non-integer width', () => {
+    expect(() => createEmptyGrid(4.5, 4)).toThrow(/positive integers/);
+  });
 });
 
 describe('inBounds', () => {
