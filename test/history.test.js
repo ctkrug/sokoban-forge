@@ -68,4 +68,24 @@ describe('MoveHistory', () => {
 
     expect(history.redo()).toBe(false);
   });
+
+  it('clears both the undo and redo stacks on reset', () => {
+    const history = makeHistory();
+    history.move('right');
+    history.move('right');
+    history.undo();
+    expect(history.canUndo()).toBe(true);
+    expect(history.canRedo()).toBe(true);
+
+    const freshState = createGameState({
+      grid: createEmptyGrid(5, 5),
+      player: { x: 0, y: 0 },
+      boxes: [],
+    });
+    history.reset(freshState);
+
+    expect(history.state).toBe(freshState);
+    expect(history.canUndo()).toBe(false);
+    expect(history.canRedo()).toBe(false);
+  });
 });
