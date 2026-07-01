@@ -46,6 +46,11 @@ describe('xmur3', () => {
   it('hashes different strings to different integers', () => {
     expect(xmur3('sokoban')()).not.toBe(xmur3('forge')());
   });
+
+  it('hashes an empty string without throwing', () => {
+    expect(() => xmur3('')()).not.toThrow();
+    expect(xmur3('')()).toBe(xmur3('')());
+  });
 });
 
 describe('createRng', () => {
