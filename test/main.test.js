@@ -182,6 +182,16 @@ describe('main.js DOM wiring', () => {
     },
   );
 
+  it('ignores keys that are not a movement key', async () => {
+    await importMain();
+
+    const event = new window.KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+    window.dispatchEvent(event);
+
+    expect(document.getElementById('move-counter').textContent).toBe('Moves: 0');
+    expect(event.defaultPrevented).toBe(false);
+  });
+
   it('preventDefaults arrow keys so they do not scroll the page', async () => {
     await importMain();
 
