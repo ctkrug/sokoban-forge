@@ -69,4 +69,15 @@ describe('aStarSolve', () => {
 
     expect(aStarSolve(grid, player, boxes)).toBeNull();
   });
+
+  it('gives up and returns null when maxStates is exhausted before a solution is found', () => {
+    // A solution genuinely exists here, but capping maxStates at 1 forces
+    // aStarSolve to stop after expanding only the start state.
+    const grid = borderedGrid(6);
+    grid[3][4] = TILE.TARGET;
+    const player = { x: 1, y: 3 };
+    const boxes = [{ x: 2, y: 3 }];
+
+    expect(aStarSolve(grid, player, boxes, { maxStates: 1 })).toBeNull();
+  });
 });

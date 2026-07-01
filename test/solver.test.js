@@ -72,6 +72,27 @@ describe('bfsSolve', () => {
     expect(bfsSolve(grid, { x: 0, y: 0 }, [])).toBeNull();
   });
 
+  it('gives up and returns null when maxStates is exhausted before a solution is found', () => {
+    // A solution genuinely exists here, but capping maxStates at 1 forces
+    // bfsSolve to stop after the start state alone - distinct from the
+    // "truly unsolvable" case below, which must also return null but for a
+    // different reason (no legal sequence exists at all).
+    const grid = createEmptyGrid(6, 6);
+    for (let x = 0; x < 6; x += 1) {
+      grid[0][x] = TILE.WALL;
+      grid[5][x] = TILE.WALL;
+    }
+    for (let y = 0; y < 6; y += 1) {
+      grid[y][0] = TILE.WALL;
+      grid[y][5] = TILE.WALL;
+    }
+    grid[3][4] = TILE.TARGET;
+    const player = { x: 1, y: 3 };
+    const boxes = [{ x: 2, y: 3 }];
+
+    expect(bfsSolve(grid, player, boxes, { maxStates: 1 })).toBeNull();
+  });
+
   it('returns null for an unsolvable puzzle (box stuck in a corner)', () => {
     const grid = createEmptyGrid(4, 4);
     for (let x = 0; x < 4; x += 1) {
