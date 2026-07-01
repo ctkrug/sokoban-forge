@@ -10,6 +10,24 @@ function gridWithWalls(width, height, walls = []) {
   return grid;
 }
 
+describe('createGameState', () => {
+  it('copies player and boxes so the caller cannot mutate the state through them', () => {
+    // Reset relies on this: it calls createGameState(currentLevel) again on
+    // every reset, reusing the same level.player/level.boxes objects each
+    // time - if they weren't copied, playing a move on one "reset" of the
+    // level would silently corrupt every other reset sharing those objects.
+    const player = { x: 1, y: 1 };
+    const boxes = [{ x: 2, y: 2 }];
+    const state = createGameState({ grid: gridWithWalls(5, 5), player, boxes });
+
+    player.x = 99;
+    boxes[0].x = 99;
+
+    expect(state.player).toEqual({ x: 1, y: 1 });
+    expect(state.boxes).toEqual([{ x: 2, y: 2 }]);
+  });
+});
+
 describe('move', () => {
   it('walks the player into an open floor tile', () => {
     const state = createGameState({
