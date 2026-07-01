@@ -22,6 +22,13 @@
         <span id="move-counter">Moves: 0</span>
       </div>
       <canvas id="game-canvas" width="400" height="320"></canvas>
+      <div id="solver-controls">
+        <button id="solve" type="button">Solve</button>
+        <button id="solve-step" type="button" disabled>Step</button>
+        <button id="solve-play" type="button" disabled>Play</button>
+        <label for="solve-speed">Speed</label>
+        <input id="solve-speed" type="range" min="60" max="600" step="20" value="250" />
+      </div>
       <p id="status" role="status"></p>
     </main>
     <script type="module" src="./src/main.js"></script>
