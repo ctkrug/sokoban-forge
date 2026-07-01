@@ -132,13 +132,23 @@ solveButton.addEventListener('click', () => {
 
 solveStepButton.addEventListener('click', stepSolution);
 
+// The slider's raw value is milliseconds between steps, i.e. a delay - but
+// it's labeled "Speed", so dragging it higher should play faster, not
+// slower. Invert it around its own min/max so a higher value always means a
+// shorter interval.
+function playbackIntervalMs() {
+  const min = Number(solveSpeedInput.min);
+  const max = Number(solveSpeedInput.max);
+  return min + max - Number(solveSpeedInput.value);
+}
+
 solvePlayButton.addEventListener('click', () => {
   if (playTimer) {
     stopPlayback();
     return;
   }
   solvePlayButton.textContent = 'Pause';
-  playTimer = setInterval(stepSolution, Number(solveSpeedInput.value));
+  playTimer = setInterval(stepSolution, playbackIntervalMs());
 });
 
 const FORM_CONTROL_TAGS = new Set(['INPUT', 'SELECT', 'TEXTAREA']);
