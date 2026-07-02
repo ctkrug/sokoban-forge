@@ -1,5 +1,7 @@
 # Shove
 
+**▶ Live demo — [apps.charliekrug.com/shove](https://apps.charliekrug.com/shove/)**
+
 **Endless box puzzles you can always solve.**
 
 [![CI](https://github.com/ctkrug/sokoban-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/ctkrug/sokoban-forge/actions/workflows/ci.yml)
