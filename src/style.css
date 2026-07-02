@@ -470,6 +470,24 @@ input[type='range']::-moz-range-thumb {
   color: var(--muted);
 }
 
+.footer-more {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+#repo-link .footer-more a {
+  color: var(--muted);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--muted) 45%, transparent);
+  text-underline-offset: 3px;
+}
+
+#repo-link .footer-more a:hover {
+  color: var(--accent);
+}
+
 /* ---------- responsive ---------- */
 
 @media (max-width: 960px) {
@@ -491,6 +509,11 @@ input[type='range']::-moz-range-thumb {
     padding: 0 16px 16px;
     flex-wrap: wrap;
     gap: 6px;
+  }
+
+  .footer-more {
+    margin-left: 0;
+    flex-basis: 100%;
   }
 
   #board-frame {
